@@ -55,8 +55,8 @@ void Render::showPause() {
 }
 
 void Render::prerenderScoreAndLevel(int score, int level) {
-    char c_score[MAX_DIGITS + sizeof(char)];
-    char c_level[MAX_DIGITS + sizeof(char)];
+    char c_score[MAX_TEXT_CHARS + sizeof(char)];
+    char c_level[MAX_TEXT_CHARS + sizeof(char)];
     
     sprintf(c_score, "%d", score);
     sprintf(c_level, "%d", level);
@@ -74,7 +74,20 @@ void Render::prerenderScoreAndLevel(int score, int level) {
 
 }
 
-void Render::showHighScore() {
+void Render::showHighScore(NamesList names_list) {
+    for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
+        if (players_names[i] == NULL) {
+            players_names[i] = new Label(renderer, font, names_list.name[i], blue);
+        }
+    }
+    
+    SDL_RenderClear(renderer);
+    renderBackground();
+    renderHighScore();
+    SDL_RenderPresent(renderer);
+}
+
+void Render::showPlayerName() {
 
 }
 
@@ -111,7 +124,7 @@ void Render::showGameEnded() {
     x = 5 * block_width + border_width; y = 10 * block_height + border_height;
     labels[Labels::GameEnded]->render(renderer, {x, y});  
     SDL_RenderPresent(renderer);
-    }
+}
 
 bool Render::loadTextures() {
     
@@ -153,6 +166,18 @@ bool Render::loadFonts() {
         return false;
     
     return true;
+}
+
+void Render::renderHighScore() {
+    int x, y;
+    x = 5 * block_width + border_width;
+    y = 2 * block_height + border_height;
+    labels[Labels::HighScore]->render(renderer, {x, y});
+
+    for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
+        x = 5 * block_width + border_width; y = (6 + i*2) * block_height + border_height;
+        players_names[i]->render(renderer, {x, y});
+    }
 }
 
 void Render::renderMainMenu() {

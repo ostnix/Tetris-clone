@@ -8,13 +8,13 @@ Menu::~Menu() {
 
 
 State Menu::openMenu(Render* _render, State _state, MenuType _menu) {
+    state = _state;
     if (_render == NULL)
         return state;
     render = _render;
     in_menu = true;
     cursor_position = 0;
     menu = _menu;
-    state = _state;
 
     menuLoop();
 
@@ -98,8 +98,7 @@ void Menu::action() {
             break;
         }
         case 2:
-            //HighScore high_score;
-            //high_score.show();
+            state = HighScore::show(render, state);
             break;
 
         case 3:

@@ -2,6 +2,7 @@
 #define __RENDER_H__
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <cassert>
 
@@ -17,13 +18,18 @@
 
 #include "tetromino.h"
 
-enum MenuType {MainMenu, Settings, InGameMenu};
+enum class MenuType {MainMenu, Settings, InGameMenu};
 
-static const unsigned int MAX_DIGITS = 10;
+static const unsigned int HIGH_SCORE_PLAYERS_NUMBER = 5;
+static const unsigned int MAX_TEXT_CHARS = 10;
 static const unsigned int BORDER_SIZE = 60;
 static const unsigned int BLOCK_SIZE = 60;
 static const unsigned int MAX_COLORS = 9;
 static const unsigned int BLOCKED_COLOR = 8;
+
+struct NamesList {
+    char name[HIGH_SCORE_PLAYERS_NUMBER][MAX_TEXT_CHARS];
+};
 
 class Render {
 public:
@@ -39,7 +45,8 @@ public:
     void showPause();
     void prerenderScoreAndLevel(int score, int level);
 
-    void showHighScore();
+    void showHighScore(NamesList names_list);
+    void showPlayerName();
     void showMenu(MenuType menu, unsigned int cursor_position);
     void showGameEnded();
 
@@ -77,6 +84,7 @@ private:
     bool loadTextures();
     bool loadFonts();
 
+    void renderHighScore();
     void renderMainMenu();
     void renderSettings();
     void renderInGameMenu();
@@ -126,11 +134,12 @@ private:
 
     enum DynamicLabels {
         LevelValue = 0,
-        ScoreValue = 1
+        ScoreValue = 1,
     };
 
     Label* labels[18] = {NULL};
     Label* dynamic_labels[2] = {NULL};
+    Label* players_names[HIGH_SCORE_PLAYERS_NUMBER] = {NULL};
 
     TTF_Font* font; 
     TTF_Font* font_big;
@@ -139,6 +148,7 @@ private:
     SDL_Color white = {250, 250, 250};
     SDL_Color red = {250, 50, 50};
     SDL_Color green = {50, 250, 50};
+    SDL_Color blue = {50, 50, 250};
 };
 
 #endif /* __RENDER_H__ */
