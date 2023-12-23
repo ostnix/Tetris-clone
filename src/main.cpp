@@ -1,6 +1,6 @@
 #include "game.h"
 
-int main() {
+int main(int argc, char* argv[]) {
     int width = 650;
     int height = 650;
 

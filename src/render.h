@@ -4,9 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cassert>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+
+#ifdef _WIN32
+    #include "SDL.h"
+    #include "SDL_image.h"
+    #include "SDL_ttf.h"
+#elif __linux__
+    #include <SDL2/SDL.h>
+    #include <SDL2/SDL_image.h>
+    #include <SDL2/SDL_ttf.h>
+#endif
+
 #include "tetromino.h"
 
 enum MenuType {MainMenu, Settings, InGameMenu};
