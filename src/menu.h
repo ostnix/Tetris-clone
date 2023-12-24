@@ -15,7 +15,9 @@ public:
     State openMenu(Render* _render, State _state, MenuType _menu);
 
 private:
+    void updateLabels();
     void addLabels();
+    void addSwitch(bool status, SDL_Point position);
     void menuLoop(); 
     void keyPressHandler();
     void moveCursor(int direction);

@@ -48,6 +48,7 @@ public:
     void popupLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
     void updateLabel(unsigned int number, unsigned int label_index);
     void updateLabel(const char* text, unsigned int label_index);
+    void updateLabel(const char* text, unsigned int label_index, SDL_Color color);
     void renderOnlyLables();
     void clearLabels();
     void showCursor(SDL_Point point);
@@ -76,6 +77,10 @@ private:
 
         void updateText(SDL_Renderer* _renderer, const char* _text) {
             updateText(_renderer, font, _text, color);
+        }
+
+        void updateText(SDL_Renderer* _renderer, const char* _text, SDL_Color _color) {
+            updateText(_renderer, font, _text, _color);
         }
 
         void updateText(SDL_Renderer* _renderer, TTF_Font* _font, const char* _text, SDL_Color _color) {

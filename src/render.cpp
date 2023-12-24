@@ -86,6 +86,13 @@ void Render::updateLabel(const char* text, unsigned int label_index) {
 
 }
 
+void Render::updateLabel(const char* text, unsigned int label_index, SDL_Color color) {
+    assert(strlen(text) < MAX_TEXT_CHARS);
+    assert(label_index < num_of_added_labels);
+
+    labels[label_index]->updateText(renderer, text, color);
+}
+
 void Render::popupLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point) {
     TTF_Font* _font = font;
     

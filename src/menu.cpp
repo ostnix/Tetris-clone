@@ -23,6 +23,8 @@ State Menu::openMenu(Render* _render, State _state, MenuType _menu) {
     return state;
 }
 
+void Menu::updateLabels() { addLabels(); }
+
 void Menu::addLabels() {
     render->clearLabels();
 
@@ -36,14 +38,26 @@ void Menu::addLabels() {
     case MenuType::Settings:
         render->addLabel(FontType::Big, "Settings", render->gray, {4, 1});
         render->addLabel(FontType::Normal, "Shadow:", render->gray, {5, 6});
+        addSwitch(state.shadow_enabled, {14, 6});
         render->addLabel(FontType::Normal, "Hold Piece:", render->gray, {5, 8});
+        addSwitch(state.hold_piece_enabled, {14, 8});
         render->addLabel(FontType::Normal, "Next Piece:", render->gray, {5, 10});
+        addSwitch(state.show_next_piece_enabled, {14, 10});
         render->addLabel(FontType::Normal, "Back", render->gray, {5, 12});
         break;
     case MenuType::InGameMenu:
         render->addLabel(FontType::Big, "Resume", render->gray, {5, 8});
         render->addLabel(FontType::Big, "Exit", render->gray, {5, 10});
         break;
+    }
+}
+
+void Menu::addSwitch(bool status, SDL_Point position) {
+    if (status) {
+        render->addLabel(FontType::Normal, "ON", render->green, position);
+    }
+    else {
+        render->addLabel(FontType::Normal, "OFF", render->red, position);
     }
 }
 
@@ -55,8 +69,6 @@ void Menu::menuLoop() {
 
         switch (menu) {
         case MenuType::MainMenu:
-            render->showCursor({2, (int)cursor_position * 2 + 6});
-            break;
         case MenuType::Settings:
             render->showCursor({2, (int)cursor_position * 2 + 6});
             break;
@@ -141,6 +153,8 @@ void Menu::changeSetting(int direction) {
             state.show_next_piece_enabled = !state.show_next_piece_enabled;
             break;
         }
+        updateLabels();
+
         break;
     }
 }
@@ -156,7 +170,7 @@ void Menu::action() {
         case 1: {
             Menu settings;
             state = settings.openMenu(render, state, MenuType::Settings);
-            addLabels();
+            updateLabels();
             break;
         }
         case 2:
