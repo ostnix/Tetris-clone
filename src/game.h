@@ -17,6 +17,7 @@ public:
     void start();
     
 private:
+    void createLabels();
     void gameLoop();
     void keyPressHandler();
 
@@ -42,7 +43,9 @@ private:
     Tetromino next_tetromino;
     Tetromino holded_tetromino;
     Tetromino shadow_tetromino;
-    
+    int score_label_index = -1;
+    int level_label_index = -1;
+
     unsigned int grid[10][20] = {0}; 
     int lines_per_level[30] =   {
                                 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,

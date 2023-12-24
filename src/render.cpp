@@ -7,7 +7,7 @@ Render::Render(int width, int height) : window_width(width), window_height(heigh
 
     assert(loadTextures());
     assert(loadFonts());
-    prerenderText();
+    //prerenderText();
 
     border_width = ((float)window_width/(12*BORDER_SIZE*2)) * BORDER_SIZE;
     border_height = ((float)window_height/(22*BORDER_SIZE)) * BORDER_SIZE ;
@@ -36,93 +36,86 @@ void Render::renderGame(const unsigned int grid[10][20],
     SDL_RenderClear(renderer);
     renderBackground();
     renderBorders();
-    renderText();
+    //renderText();
     renderGrid(grid);
     renderTetromino(shadow_tetromino, true, true);
     renderTetromino(tetromino, true, false); 
     renderTetromino(next_tetromino, false, false);
     renderTetromino(holded_tetromino, false, false);
+    renderLabels();
     SDL_RenderPresent(renderer);
 }
 
-void Render::showPause() {
-    SDL_Point size = labels[Labels::Pause]->getSufaceSize();
-
-    labels[Labels::Pause]->render(renderer,{window_width/2 - size.x/2, 
-                                            window_height/2 - size.y/2});
-
-    SDL_RenderPresent(renderer);
+int Render::addLabel(FontType font_type, unsigned int number, SDL_Color color, SDL_Point point) {
+    char text[MAX_TEXT_CHARS + sizeof(char)];
+    sprintf(text, "%d", number);
+    return addLabel(font_type, text, color, point);
 }
 
-void Render::prerenderScoreAndLevel(int score, int level) {
-    char c_score[MAX_TEXT_CHARS + sizeof(char)];
-    char c_level[MAX_TEXT_CHARS + sizeof(char)];
-    
-    sprintf(c_score, "%d", score);
-    sprintf(c_level, "%d", level);
+int Render::addLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point) {
+    assert(strlen(text) < MAX_TEXT_CHARS);
+    assert(num_of_added_labels < MAXIMUM_NUM_OF_LABELS);
 
-    if (dynamic_labels[DynamicLabels::ScoreValue] != NULL)
-        dynamic_labels[DynamicLabels::ScoreValue]->updateText(renderer, font, c_score, grey);
-    else 
-        dynamic_labels[DynamicLabels::ScoreValue] = new Label(renderer, font, c_score, grey);
+    switch (font_type) {
+    case FontType::Normal:
+        labels[num_of_added_labels] = new Label(renderer, font, text, color, {point.x * block_width + border_width,
+                                                                              point.y * block_height + border_height});
+        break;
 
-    if (dynamic_labels[DynamicLabels::LevelValue] != NULL) 
-        dynamic_labels[DynamicLabels::LevelValue]->updateText(renderer, font, c_level, grey);
-
-    else 
-        dynamic_labels[DynamicLabels::LevelValue] = new Label(renderer, font, c_level, grey);
-
-}
-
-void Render::showHighScore(NamesList names_list) {
-    for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
-        if (players_names[i] == NULL) {
-            players_names[i] = new Label(renderer, font, names_list.name[i], blue);
-        }
+    case FontType::Big:
+        labels[num_of_added_labels] = new Label(renderer, font_big, text, color, { point.x * block_width + border_width,
+                                                                                   point.y * block_height + border_height});
+        break;
     }
+
+    num_of_added_labels++;
+    return (num_of_added_labels - 1);
+}
+
+void Render::updateLabel(unsigned int number, unsigned int label_index) {
+    char text[MAX_TEXT_CHARS + sizeof(char)];
+    sprintf(text, "%d", number);
+    updateLabel(text, label_index);
+}
+
+void Render::updateLabel(const char* text, unsigned int label_index) {
+    assert(strlen(text) < MAX_TEXT_CHARS);
+    assert(label_index < num_of_added_labels);
+
+    labels[label_index]->updateText(renderer, text);
+
+}
+
+void Render::popupLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point) {
+    TTF_Font* _font = font;
     
+    if (font_type == FontType::Big)
+        _font = font_big;
+    
+    Label message(renderer, _font, text, color, {point.x * block_width + border_width,
+                                    point.y * block_height + border_height});
+    message.render(renderer);
+    SDL_RenderPresent(renderer);
+}
+
+void Render::renderOnlyLables() {
     SDL_RenderClear(renderer);
     renderBackground();
-    renderHighScore();
+    renderLabels();
     SDL_RenderPresent(renderer);
 }
 
-void Render::showPlayerName() {
-
-}
-
-void Render::showMenu(MenuType menu, unsigned int cursor_position) {
-    switch (menu) {
-    case MenuType::MainMenu:
-        SDL_RenderClear(renderer);
-        renderBackground();
-        renderMainMenu();
-        renderCursor(cursor_position, menu);
-        SDL_RenderPresent(renderer);
-        break;
-    
-    case MenuType::Settings:
-        SDL_RenderClear(renderer);
-        renderBackground();
-        renderSettings();
-        renderCursor(cursor_position, menu);
-        SDL_RenderPresent(renderer);
-        break;
-    
-    case MenuType::InGameMenu:
-        SDL_RenderClear(renderer);
-        renderBackground();
-        renderInGameMenu();
-        renderCursor(cursor_position, menu);
-        SDL_RenderPresent(renderer);
-        break;
+void Render::clearLabels() {
+    for (int i = 0; i < num_of_added_labels; i++) {
+        delete labels[i];
     }
+
+    num_of_added_labels = 0;
 }
 
-void Render::showGameEnded() {
-    int x, y;
-    x = 5 * block_width + border_width; y = 10 * block_height + border_height;
-    labels[Labels::GameEnded]->render(renderer, {x, y});  
+void Render::showCursor(SDL_Point point) {
+    SDL_Rect block = {point.x * block_width + border_width, point.y * block_height + border_height, block_width * 2, block_height * 2};
+    SDL_RenderCopy(renderer, cursor, NULL, &block);
     SDL_RenderPresent(renderer);
 }
 
@@ -168,91 +161,6 @@ bool Render::loadFonts() {
     return true;
 }
 
-void Render::renderHighScore() {
-    int x, y;
-    x = 5 * block_width + border_width;
-    y = 2 * block_height + border_height;
-    labels[Labels::HighScore]->render(renderer, {x, y});
-
-    for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
-        x = 5 * block_width + border_width; y = (6 + i*2) * block_height + border_height;
-        players_names[i]->render(renderer, {x, y});
-    }
-}
-
-void Render::renderMainMenu() {
-    int x, y;
-    x = 5 * block_width + border_width; y = 6 * block_height + border_height;
-    labels[Labels::StartGame]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 8 * block_height + border_height;
-    labels[Labels::Settings]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 10 * block_height + border_height;
-    labels[Labels::HighScore]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 12 * block_height + border_height;    
-    labels[Labels::Exit]->render(renderer, {x, y});
-}
-
-void Render::renderSettings() {
-    int x, y;
-    x = 4 * block_width + border_width; y = 1 * block_height + border_height;
-    labels[Labels::Settings]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 6 * block_height + border_height;
-    labels[Labels::ShadowEnabled]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 8 * block_height + border_height;    
-    labels[Labels::HoldPieceEnabled]->render(renderer, {x, y});
-    
-    x = 5 * block_width + border_width; y = 10 * block_height + border_height;    
-    labels[Labels::ShowNextPieceEnabled]->render(renderer, {x, y});
-    
-    x = 5 * block_width + border_width; y = 12 * block_height + border_height;    
-    labels[Labels::Back]->render(renderer, {x, y});
-}
-
-void Render::renderInGameMenu() {
-    int x, y;
-    x = 5 * block_width + border_width; y = 8 * block_height + border_height;
-    labels[Labels::Resume]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 10 * block_height + border_height;
-    labels[Labels::Exit]->render(renderer, {x, y});
-}
-
-void Render::renderCursor(unsigned int position, MenuType menu) {
-    int x, y;
-    SDL_Rect block;
-
-    switch (menu) {
-    case MenuType::MainMenu:
-        x = 2 * block_width + border_width;
-        y = (6 + position * 2) * block_height + border_height;               
-
-        block = {x, y, block_width * 2, block_height * 2};   
-        SDL_RenderCopy(renderer, cursor, NULL, &block);
-        break;
-    
-    case MenuType::Settings:
-        x = 2 * block_width + border_width;
-        y = (6 + position * 2) * block_height + border_height;               
-
-        block = {x, y, block_width, block_height};   
-        SDL_RenderCopy(renderer, cursor, NULL, &block);
-        break;
-
-    case MenuType::InGameMenu:
-        x = 2 * block_width + border_width;
-        y = (8 + position * 2) * block_height + border_height;               
-
-        block = {x, y, block_width * 2, block_height * 2};   
-        SDL_RenderCopy(renderer, cursor, NULL, &block);
-        break;
-    }
-}
-
 void Render::renderBackground() {
     SDL_Rect background = {0, 0, window_width, window_height};
     SDL_RenderCopy(renderer, background_texture, NULL, &background);
@@ -275,42 +183,10 @@ void Render::renderBorders() {
     }
 }
 
-void Render::prerenderText() {
-    labels[Labels::Next] = new Label(renderer, font, (char*)"Next piece:", grey);
-    labels[Labels::Pause] = new Label(renderer, font_big, (char*)"Pause", white);
-    labels[Labels::Holded] = new Label(renderer, font, (char*)"Holded Piece:", grey);
-    labels[Labels::StartGame] = new Label(renderer, font_big, (char*)"Start game", grey);
-    labels[Labels::Settings] = new Label(renderer, font_big, (char*)"Settings", grey);
-    labels[Labels::HighScore] = new Label(renderer, font_big, (char*)"High score", grey);
-    labels[Labels::Exit] = new Label(renderer, font_big, (char*)"Exit", grey);
-    labels[Labels::GameEnded] = new Label(renderer, font_big, (char*)"GAME ENDED!!!", white);
-    labels[Labels::ShadowEnabled] = new Label(renderer, font, (char*)"Shadow : ", grey);
-    labels[Labels::HoldPieceEnabled] = new Label(renderer, font, (char*)"Hold piece : ", grey);
-    labels[Labels::ShowNextPieceEnabled] = new Label(renderer, font, (char*)"Show next piece : ", grey);
-    labels[Labels::Back] = new Label(renderer, font, (char*)"Back", grey);
-    labels[Labels::On] = new Label(renderer, font, (char*)"On", green);
-    labels[Labels::Off] = new Label(renderer, font, (char*)"Off", red);
-    labels[Labels::Resume] = new Label(renderer, font_big, (char*)"Resume", grey);
-    labels[Labels::Level] = new Label(renderer, font, (char*)"Level: ", grey);
-    labels[Labels::Score] = new Label(renderer, font, (char*)"Score: ", grey);
-    labels[Labels::NewHighScore] = new Label(renderer, font_big, (char*)"New High Score!", grey);
-}
- 
-void Render::renderText() {
-    int x, y;
-    x = 12 * block_width + border_width; y = 0 * block_height + border_height;
-    labels[Labels::Next]->render(renderer, {x, y});
-    
-    x = 12 * block_width + border_width; y = 8 * block_height + border_height;
-    labels[Labels::Level]->render(renderer, {x, y});
-    dynamic_labels[DynamicLabels::LevelValue]->render(renderer, {x + labels[Labels::Level]->getSufaceSize().x, y});
-
-    x = 12 * block_width + border_width; y = 10 * block_height + border_height;
-    labels[Labels::Score]->render(renderer, {x, y});
-    dynamic_labels[DynamicLabels::ScoreValue]->render(renderer, {x + labels[Labels::Score]->getSufaceSize().x, y});
-
-    x = 12 * block_width + border_width; y = 15 * block_height + border_height;    
-    labels[Labels::Holded]->render(renderer, {x, y});
+void Render::renderLabels() {
+    for (int i = 0; i < num_of_added_labels; i++) {
+        labels[i]->render(renderer);
+    }
 }
 
 void Render::renderGrid(const unsigned int grid[10][20]) {  

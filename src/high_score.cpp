@@ -17,7 +17,7 @@ State HighScore::show(Render* _render, State _state) {
 
     while (!key_pressed) {
         SDL_Delay(state.delay);
-        render->showHighScore(names_list);
+        //render->showHighScore(names_list);
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {

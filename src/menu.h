@@ -5,6 +5,8 @@
 #include "high_score.h"
 #include "render.h"
 
+enum class MenuType { MainMenu, Settings, InGameMenu };
+
 class Menu {
 public:
     Menu();
@@ -13,6 +15,7 @@ public:
     State openMenu(Render* _render, State _state, MenuType _menu);
 
 private:
+    void addLabels();
     void menuLoop(); 
     void keyPressHandler();
     void moveCursor(int direction);
@@ -23,7 +26,7 @@ private:
     unsigned int cursor_position = 0;
     MenuType menu = MenuType::MainMenu;
     State state;
-    Render* render;
+    Render* render = NULL;
 
 };
 

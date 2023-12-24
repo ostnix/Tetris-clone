@@ -20,13 +20,28 @@ void Game::start() {
     state.delay = 1000/FRAME_RATE; 
 
     state = menu.openMenu(render, state, MenuType::MainMenu);
+    createLabels();
 
     srand(time(NULL));
-    render->prerenderScoreAndLevel(state.score, state.level);
+
     generateNextTetromino();
     holded_tetromino.color = 0;
     shadow_tetromino.color = 0;
     gameLoop();
+}
+
+void Game::createLabels() {
+    render->clearLabels();
+    score_label_index = -1;
+    level_label_index = -1;
+
+    render->addLabel(FontType::Normal, "Next", render->gray, {12, 0});
+    render->addLabel(FontType::Normal, "Score:", render->gray, {12, 8});
+    score_label_index = render->addLabel(FontType::Normal, state.score, render->gray, {16,8});
+    render->addLabel(FontType::Normal, "Level:", render->gray, {12, 10});
+    level_label_index = render->addLabel(FontType::Normal, state.level, render->gray, {16,10});
+    render->addLabel(FontType::Normal, "Holded piece", render->gray, {12, 15});
+
 }
 
 void Game::gameLoop() {
@@ -52,7 +67,7 @@ void Game::gameLoop() {
             state.soft_drop = false;
 
             if (!spawnTetromino()) {
-                render->showGameEnded();
+                render->popupLabel(FontType::Big, "Game Ended", render->white, {5,10});
                 SDL_Delay(5000);
                 printf("GAME ENDED!!!\n"); 
                 state.game_ended = true;
@@ -101,7 +116,7 @@ void Game::keyPressHandler() {
                 break;
 
             case SDLK_p:
-                render->showPause();
+                render->popupLabel(FontType::Big, "Pause", render->white, {5,10});
                 state.paused = true;
                 break;
             
@@ -115,6 +130,7 @@ void Game::keyPressHandler() {
 
             case SDLK_ESCAPE:
                 state = menu.openMenu(render, state, MenuType::InGameMenu);
+                createLabels();
                 break;
             }            
         }
@@ -318,7 +334,8 @@ void Game::updateScoreAndLevel(int filled_lines) {
             ++state.level;
     }
 
-    render->prerenderScoreAndLevel(state.score, state.level);
+    render->updateLabel(state.score, score_label_index);
+    render->updateLabel(state.level, level_label_index);
 }
 
 bool Game::isLineFilled(int row) {

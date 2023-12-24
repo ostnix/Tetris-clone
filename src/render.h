@@ -18,10 +18,11 @@
 
 #include "tetromino.h"
 
-enum class MenuType {MainMenu, Settings, InGameMenu};
+enum class FontType {Normal, Big};
 
 static const unsigned int HIGH_SCORE_PLAYERS_NUMBER = 5;
-static const unsigned int MAX_TEXT_CHARS = 10;
+static const unsigned int MAXIMUM_NUM_OF_LABELS = 10;
+static const unsigned int MAX_TEXT_CHARS = 15;
 static const unsigned int BORDER_SIZE = 60;
 static const unsigned int BLOCK_SIZE = 60;
 static const unsigned int MAX_COLORS = 9;
@@ -42,26 +43,41 @@ public:
                     const Tetromino& holded_tetromino,
                     const Tetromino& shadow_tetromino);
     
-    void showPause();
-    void prerenderScoreAndLevel(int score, int level);
+    int addLabel(FontType font_type, unsigned int number, SDL_Color color, SDL_Point point);
+    int addLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
+    void popupLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
+    void updateLabel(unsigned int number, unsigned int label_index);
+    void updateLabel(const char* text, unsigned int label_index);
+    void renderOnlyLables();
+    void clearLabels();
+    void showCursor(SDL_Point point);
 
-    void showHighScore(NamesList names_list);
-    void showPlayerName();
-    void showMenu(MenuType menu, unsigned int cursor_position);
-    void showGameEnded();
+    const SDL_Color gray = {200, 200, 200};
+    const SDL_Color white = {250, 250, 250};
+    const SDL_Color red = {250, 50, 50};
+    const SDL_Color green = {50, 250, 50};
+    const SDL_Color blue = {50, 50, 250};
 
 private:
     struct Label {
-        Label(SDL_Renderer* _renderer, TTF_Font* _font, const char* _text, SDL_Color _color) {
-            surface = TTF_RenderUTF8_Solid(_font, _text, _color); 
+        Label(SDL_Renderer* _renderer, TTF_Font* _font, const char* _text, SDL_Color _color) : font(_font), color(_color) {
+            surface = TTF_RenderUTF8_Solid(font, _text, _color);
             texture = SDL_CreateTextureFromSurface(_renderer, surface);
         }
-        
+
+        Label(SDL_Renderer* _renderer, TTF_Font* _font, const char* _text, SDL_Color _color, SDL_Point _point) : Label(_renderer, _font, _text, _color) {
+            point = _point;
+        }
+
         ~Label() {
             SDL_DestroyTexture(texture);
             SDL_FreeSurface(surface);
         }
-    
+
+        void updateText(SDL_Renderer* _renderer, const char* _text) {
+            updateText(_renderer, font, _text, color);
+        }
+
         void updateText(SDL_Renderer* _renderer, TTF_Font* _font, const char* _text, SDL_Color _color) {
             SDL_DestroyTexture(texture);
             SDL_FreeSurface(surface);           
@@ -70,11 +86,20 @@ private:
             texture = SDL_CreateTextureFromSurface(_renderer, surface);
         }
 
+        void render(SDL_Renderer* _renderer) {
+            SDL_Rect rect = {point.x, point.y, surface->w, surface->h};
+            SDL_RenderCopy(_renderer, texture, NULL, &rect);
+        }
+
         void render(SDL_Renderer* _renderer, SDL_Point p) {
             SDL_Rect rect = {p.x, p.y, surface->w, surface->h};
             SDL_RenderCopy(_renderer, texture, NULL, &rect);
         }
 
+        TTF_Font* font; 
+        SDL_Color color;
+
+        SDL_Point point = {0, 0};
         SDL_Point getSufaceSize() {return {surface->w, surface->h};}
 
         SDL_Surface* surface;
@@ -84,16 +109,10 @@ private:
     bool loadTextures();
     bool loadFonts();
 
-    void renderHighScore();
-    void renderMainMenu();
-    void renderSettings();
-    void renderInGameMenu();
-    void renderCursor(unsigned int position, MenuType menu);
     void renderBackground();
     void renderBorders();
-    void prerenderText();
-    void renderText();
-    void generateStaticTextTexture();
+    void renderLabels();
+    
     void renderGrid(const unsigned int grid[10][20]);
     void renderTetromino(const Tetromino& tetromino, bool in_grid_bounds, bool transparent);
 
@@ -111,45 +130,13 @@ private:
     SDL_Texture* block_colors[MAX_COLORS];
     SDL_Texture* cursor;
 
-    enum Labels {
-        None = 0,
-        Next = 1,
-        Pause = 2,
-        Level = 3,
-        Score = 4,
-        Holded = 5,
-        StartGame = 6,
-        Settings = 7,
-        HighScore = 8,
-        Exit = 9,
-        On = 10,
-        Off = 11,
-        GameEnded = 12,
-        ShadowEnabled = 13,
-        HoldPieceEnabled = 14,
-        ShowNextPieceEnabled = 15,
-        Back = 16, 
-        Resume = 17,
-        NewHighScore = 18
-    };
-
-    enum DynamicLabels {
-        LevelValue = 0,
-        ScoreValue = 1,
-    };
-
-    Label* labels[19] = {NULL};
-    Label* dynamic_labels[2] = {NULL};
-    Label* players_names[HIGH_SCORE_PLAYERS_NUMBER] = {NULL};
+    Label* labels[MAXIMUM_NUM_OF_LABELS] = {NULL};
+    unsigned int num_of_added_labels = 0;
 
     TTF_Font* font; 
     TTF_Font* font_big;
 
-    SDL_Color grey = {200, 200, 200};
-    SDL_Color white = {250, 250, 250};
-    SDL_Color red = {250, 50, 50};
-    SDL_Color green = {50, 250, 50};
-    SDL_Color blue = {50, 50, 250};
+
 };
 
 #endif /* __RENDER_H__ */
