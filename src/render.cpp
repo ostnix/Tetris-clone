@@ -31,7 +31,8 @@ void Render::renderGame(const unsigned int grid[10][20],
                         const Tetromino& tetromino, 
                         const Tetromino& next_tetromino,
                         const Tetromino& holded_tetromino,
-                        const Tetromino& shadow_tetromino) {
+                        const Tetromino& shadow_tetromino,
+                        bool show_next_tetromino = true) {
 
     SDL_RenderClear(renderer);
     renderBackground();
@@ -40,8 +41,11 @@ void Render::renderGame(const unsigned int grid[10][20],
     renderGrid(grid);
     renderTetromino(shadow_tetromino, true, true);
     renderTetromino(tetromino, true, false); 
-    renderTetromino(next_tetromino, false, false);
     renderTetromino(holded_tetromino, false, false);
+
+    if (show_next_tetromino)
+        renderTetromino(next_tetromino, false, false);
+
     renderLabels();
     SDL_RenderPresent(renderer);
 }

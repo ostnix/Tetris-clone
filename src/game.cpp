@@ -75,7 +75,7 @@ void Game::gameLoop() {
         }
         
         if (state.rerender) { 
-            render->renderGame(grid, tetromino, next_tetromino, holded_tetromino, shadow_tetromino);
+            render->renderGame(grid, tetromino, next_tetromino, holded_tetromino, shadow_tetromino, state.show_next_piece_enabled);
             state.rerender = false;
         }
 
@@ -154,6 +154,9 @@ bool Game::spawnTetromino() {
 }
 
 void Game::holdTetromino() {
+    if (!state.hold_piece_enabled)
+        return;
+
     if (holded_tetromino.color == 0) {                          // No tetromino holded
         holded_tetromino.col = 15;
         holded_tetromino.row = 18;

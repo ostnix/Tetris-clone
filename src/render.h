@@ -41,7 +41,8 @@ public:
                     const Tetromino& tetromino, 
                     const Tetromino& next_tetromino, 
                     const Tetromino& holded_tetromino,
-                    const Tetromino& shadow_tetromino);
+                    const Tetromino& shadow_tetromino,
+                    bool show_next_tetromino);
     
     int addLabel(FontType font_type, unsigned int number, SDL_Color color, SDL_Point point);
     int addLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
