@@ -293,6 +293,7 @@ void Render::prerenderText() {
     labels[Labels::Resume] = new Label(renderer, font_big, (char*)"Resume", grey);
     labels[Labels::Level] = new Label(renderer, font, (char*)"Level: ", grey);
     labels[Labels::Score] = new Label(renderer, font, (char*)"Score: ", grey);
+    labels[Labels::NewHighScore] = new Label(renderer, font_big, (char*)"New High Score!", grey);
 }
  
 void Render::renderText() {

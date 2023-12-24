@@ -16,6 +16,7 @@ private:
     void menuLoop(); 
     void keyPressHandler();
     void moveCursor(int direction);
+    void changeSetting(int direction);
     void action();
 
     bool in_menu = false;

@@ -17,7 +17,6 @@ public:
     void start();
     
 private:
-    void mainMenu();
     void gameLoop();
     void keyPressHandler();
 

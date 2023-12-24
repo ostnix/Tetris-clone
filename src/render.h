@@ -129,7 +129,8 @@ private:
         HoldPieceEnabled = 14,
         ShowNextPieceEnabled = 15,
         Back = 16, 
-        Resume = 17
+        Resume = 17,
+        NewHighScore = 18
     };
 
     enum DynamicLabels {
@@ -137,7 +138,7 @@ private:
         ScoreValue = 1,
     };
 
-    Label* labels[18] = {NULL};
+    Label* labels[19] = {NULL};
     Label* dynamic_labels[2] = {NULL};
     Label* players_names[HIGH_SCORE_PLAYERS_NUMBER] = {NULL};
 

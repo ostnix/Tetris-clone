@@ -8,9 +8,14 @@ class HighScore {
 public:
     static State show(Render* _render, State _state);
     static void writeNewRecord(Render* _render);
-private:
-    HighScore();
+    static void getTable();
 
+private: 
+    static NamesList loadTable();
+    static bool saveTable(NamesList names_list);
+    static bool updateTable(NamesList names_list);
+
+    HighScore();
 };
 
 

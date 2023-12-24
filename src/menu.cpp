@@ -8,10 +8,11 @@ Menu::~Menu() {
 
 
 State Menu::openMenu(Render* _render, State _state, MenuType _menu) {
-    state = _state;
-    if (_render == NULL)
-        return state;
     render = _render;
+    state = _state;
+    if (render == NULL)
+        return state;
+
     in_menu = true;
     cursor_position = 0;
     menu = _menu;
@@ -40,10 +41,12 @@ void Menu::keyPressHandler() {
             switch(event.key.keysym.sym) {
             case SDLK_LEFT:
             case SDLK_a:
+                changeSetting(-1);
                 break;
             
             case SDLK_RIGHT:
             case SDLK_d:
+                changeSetting(1);
                 break;
             
             case SDLK_UP:
@@ -84,6 +87,26 @@ void Menu::moveCursor(int direction) {
     }
 }
 
+void Menu::changeSetting(int direction) {
+    switch (menu) {
+    case MenuType::Settings:
+        switch (cursor_position) {
+        case 0:                     // shadow on/off
+            state.shadow_enabled = !state.shadow_enabled;
+            break;
+
+        case 1:                     // hold piece on/off
+            state.hold_piece_enabled = !state.hold_piece_enabled;
+            break;
+
+        case 2:                     // show next piece on/off
+            state.show_next_piece_enabled = !state.show_next_piece_enabled;
+            break;
+        }
+        break;
+    }
+}
+
 void Menu::action() {
     switch (menu) {
     case MenuType::MainMenu:
@@ -109,13 +132,16 @@ void Menu::action() {
     
     case MenuType::Settings:
         switch (cursor_position) {
-        case 0:
+        case 0:                     // shadow on/off
+            changeSetting(0);
             break;
         
-        case 1:
+        case 1:                     // hold piece on/off
+            changeSetting(0);
             break;
 
-        case 2:
+        case 2:                     // show next piece on/off
+            changeSetting(0);
             break;
 
         case 3:

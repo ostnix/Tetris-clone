@@ -1,7 +1,7 @@
 #ifndef __TETROMINO_H__
 #define __TETROMINO_H__
 
-enum Colors {NONE = 0, BLUE, CYAN, GREEN, ORANGE, RED, VIOLET, YELLOW};
+enum class Colors {NONE = 0, BLUE, CYAN, GREEN, ORANGE, RED, VIOLET, YELLOW};
  
 static const int shapes[7][4][2] = {
     {{0, 0}, {-1, 0}, {-2,  0}, { 1, 0}},  // shape I
