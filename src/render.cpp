@@ -50,13 +50,13 @@ void Render::renderGame(const unsigned int grid[10][20],
     SDL_RenderPresent(renderer);
 }
 
-int Render::addLabel(FontType font_type, unsigned int number, SDL_Color color, SDL_Point point) {
+LabelId Render::addLabel(FontType font_type, unsigned int number, SDL_Color color, SDL_Point point) {
     char text[MAX_TEXT_CHARS + sizeof(char)];
     sprintf(text, "%d", number);
     return addLabel(font_type, text, color, point);
 }
 
-int Render::addLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point) {
+LabelId Render::addLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point) {
     assert(strlen(text) < MAX_TEXT_CHARS);
     assert(num_of_added_labels < MAXIMUM_NUM_OF_LABELS);
 

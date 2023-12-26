@@ -73,7 +73,8 @@ void Game::gameLoop() {
 
             if (!spawnTetromino()) {
                 render->popupLabel(FontType::Big, "Game Ended", render->white, {5,10});
-                SDL_Delay(5000);
+                high_score->checkForNewRecord(state);
+                high_score->show(state);
                 printf("GAME ENDED!!!\n"); 
                 state.game_ended = true;
             }

@@ -5,7 +5,7 @@
 #include "settings.h"
 #include "render.h"
 
-struct NamesList {
+struct RecordsList {
     char name[MAX_TEXT_CHARS];
     unsigned int score;
 };
@@ -16,13 +16,15 @@ public:
     ~HighScore();
 
     void show(State _state);
-    void checkForNewRecord(unsigned int score);
+    void checkForNewRecord(State& state);
 
 private:
+    void writeNewRecord(State& state);
+
     void load();
     void save();
 
-    NamesList names_list[HIGH_SCORE_PLAYERS_NUMBER];
+    RecordsList records_list[HIGH_SCORE_PLAYERS_NUMBER];
     Render* render;
 ;
 };

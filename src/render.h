@@ -18,6 +18,7 @@
 
 #include "tetromino.h"
 
+typedef int LabelId;
 enum class FontType {Normal, Big};
 
 static const unsigned int HIGH_SCORE_PLAYERS_NUMBER = 5;
@@ -40,8 +41,8 @@ public:
                     const Tetromino& shadow_tetromino,
                     bool show_next_tetromino);
     
-    int addLabel(FontType font_type, unsigned int number, SDL_Color color, SDL_Point point);
-    int addLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
+    LabelId addLabel(FontType font_type, unsigned int number, SDL_Color color, SDL_Point point);
+    LabelId addLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
     void popupLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
     void updateLabel(unsigned int number, unsigned int label_index);
     void updateLabel(const char* text, unsigned int label_index);
@@ -89,6 +90,10 @@ private:
         }
 
         void render(SDL_Renderer* _renderer) {
+            if (!surface || !texture) {
+                return;
+            }
+
             SDL_Rect rect = {point.x, point.y, surface->w, surface->h};
             SDL_RenderCopy(_renderer, texture, NULL, &rect);
         }
@@ -102,7 +107,7 @@ private:
         SDL_Color color;
 
         SDL_Point point = {0, 0};
-        SDL_Point getSufaceSize() {return {surface->w, surface->h};}
+        //SDL_Point getSufaceSize() {return {surface->w, surface->h};}
 
         SDL_Surface* surface;
         SDL_Texture* texture;
