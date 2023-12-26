@@ -17,8 +17,8 @@ void HighScore::show(State _state) {
     render->clearLabels();
     render->addLabel(FontType::Big, "HIGH SCORES:", render->white, {4, 1});
     for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
-        render->addLabel(FontType::Normal, names_list.name[i], render->blue, {6, 5 + i * 2});
-        render->addLabel(FontType::Normal, names_list.score[i], render->blue, {14, 5 + i * 2});
+        render->addLabel(FontType::Normal, names_list[i].name, render->blue, {6, 5 + i * 2});
+        render->addLabel(FontType::Normal, names_list[i].score, render->blue, {14, 5 + i * 2});
     }
 
     while (!key_pressed) {
@@ -43,8 +43,8 @@ void HighScore::load() {
 
     if (!root) {    // if no file exist, creating new table
         for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
-            strcpy(names_list.name[i], "EMPTY");
-            names_list.score[i] = 0;
+            strcpy(names_list[i].name, "EMPTY");
+            names_list[i].score = 0;
         }
     }
     else {
@@ -56,10 +56,10 @@ void HighScore::load() {
             json_object* player = json_object_array_get_idx(root, i);
 
             json_object* player_name = json_object_object_get(player, "Name");
-            strcpy(names_list.name[i], json_object_get_string(player_name));
+            strcpy(names_list[i].name, json_object_get_string(player_name));
 
             json_object* player_score = json_object_object_get(player, "Score");
-            names_list.score[i] = json_object_get_int(player_score);
+            names_list[i].score = json_object_get_int(player_score);
         }
     }
 
@@ -73,14 +73,26 @@ void HighScore::save() {
         root = json_object_new_array_ext(HIGH_SCORE_PLAYERS_NUMBER);
         for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
             json_object* player = json_object_new_object();
-            json_object_object_add(player, "Name", json_object_new_string(names_list.name[i]));
-            json_object_object_add(player, "Score", json_object_new_int(names_list.score[i]));
+            json_object_object_add(player, "Name", json_object_new_string(names_list[i].name));
+            json_object_object_add(player, "Score", json_object_new_int(names_list[i].score));
             json_object_array_add(root, player);
         }
-
     }
     else {
+        int n = json_object_array_length(root);
+        if (n > HIGH_SCORE_PLAYERS_NUMBER)
+            n = HIGH_SCORE_PLAYERS_NUMBER;
 
+        for (int i = 0; i < n; i++) {
+            json_object* player = json_object_array_get_idx(root, i);
+
+            json_object* player_name = json_object_object_get(player, "Name");
+            json_object_set_string(player_name, names_list[i].name);
+
+            json_object* player_score = json_object_object_get(player, "Score");
+            json_object_set_int(player_score, names_list[i].score);
+
+        }
     }
     assert(json_object_to_file_ext("HighScores.json", root, JSON_C_TO_STRING_PRETTY) >= 0);
 

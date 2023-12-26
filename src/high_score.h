@@ -6,8 +6,8 @@
 #include "render.h"
 
 struct NamesList {
-    char name[HIGH_SCORE_PLAYERS_NUMBER][MAX_TEXT_CHARS];
-    unsigned int score[HIGH_SCORE_PLAYERS_NUMBER];
+    char name[MAX_TEXT_CHARS];
+    unsigned int score;
 };
 
 class HighScore {
@@ -22,7 +22,7 @@ private:
     void load();
     void save();
 
-    NamesList names_list;
+    NamesList names_list[HIGH_SCORE_PLAYERS_NUMBER];
     Render* render;
 ;
 };
