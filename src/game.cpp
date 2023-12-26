@@ -10,16 +10,21 @@ Game::Game(int width, int height, unsigned int start_level) {
         state.level = start_level;
     else
         state.level = 29;
+
+    high_score = new HighScore(render);
+    menu = new Menu(render, high_score);
 }
 
 Game::~Game() {
+    delete menu;
+    delete high_score;
     delete render;
 }
 
 void Game::start() {
     state.delay = 1000/FRAME_RATE; 
 
-    state = menu.openMenu(render, state, MenuType::MainMenu);
+    state = menu->openMenu(state, MenuType::MainMenu);
     createLabels();
 
     srand(time(NULL));
@@ -129,7 +134,7 @@ void Game::keyPressHandler() {
                 break;
 
             case SDLK_ESCAPE:
-                state = menu.openMenu(render, state, MenuType::InGameMenu);
+                state = menu->openMenu(state, MenuType::InGameMenu);
                 createLabels();
                 break;
             }            

@@ -21,16 +21,12 @@
 enum class FontType {Normal, Big};
 
 static const unsigned int HIGH_SCORE_PLAYERS_NUMBER = 5;
-static const unsigned int MAXIMUM_NUM_OF_LABELS = 10;
+static const unsigned int MAXIMUM_NUM_OF_LABELS = 15;
 static const unsigned int MAX_TEXT_CHARS = 15;
 static const unsigned int BORDER_SIZE = 60;
 static const unsigned int BLOCK_SIZE = 60;
 static const unsigned int MAX_COLORS = 9;
 static const unsigned int BLOCKED_COLOR = 8;
-
-struct NamesList {
-    char name[HIGH_SCORE_PLAYERS_NUMBER][MAX_TEXT_CHARS];
-};
 
 class Render {
 public:

@@ -9,10 +9,11 @@ enum class MenuType { MainMenu, Settings, InGameMenu };
 
 class Menu {
 public:
-    Menu();
-    ~Menu();
+    Menu(Render* _render) : render(_render) {}
+    Menu(Render* _render, HighScore* _high_score) : render(_render), high_score(_high_score) {}
+    ~Menu() {}
 
-    State openMenu(Render* _render, State _state, MenuType _menu);
+    State openMenu(State _state, MenuType _menu);
 
 private:
     void updateLabels();
@@ -29,6 +30,7 @@ private:
     MenuType menu = MenuType::MainMenu;
     State state;
     Render* render = NULL;
+    HighScore* high_score = NULL;
 
 };
 

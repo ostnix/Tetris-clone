@@ -39,6 +39,7 @@ private:
     bool isValidPosition(int col, int row);
     bool isValidRotation(int blocks[4][2]); 
  
+
     Tetromino tetromino;
     Tetromino next_tetromino;
     Tetromino holded_tetromino;
@@ -58,7 +59,8 @@ private:
                                             2, 2, 2, 2, 2, 2, 2, 2, 2, 1
                                             };
     State state;
-    Menu menu;
+    HighScore* high_score;
+    Menu* menu;
     Render* render;
 };
 

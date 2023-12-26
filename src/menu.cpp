@@ -1,17 +1,9 @@
 #include "menu.h"
 
-Menu::Menu() {
-}
+State Menu::openMenu(State _state, MenuType _menu) {
+    assert(render);
 
-Menu::~Menu() {
-}
-
-
-State Menu::openMenu(Render* _render, State _state, MenuType _menu) {
-    render = _render;
     state = _state;
-    if (render == NULL)
-        return state;
 
     in_menu = true;
     cursor_position = 0;
@@ -168,13 +160,15 @@ void Menu::action() {
             break;
         
         case 1: {
-            Menu settings;
-            state = settings.openMenu(render, state, MenuType::Settings);
+            Menu settings(render);
+            state = settings.openMenu(state, MenuType::Settings);
             updateLabels();
             break;
         }
         case 2:
-            state = HighScore::show(render, state);
+            assert(high_score);
+            high_score->show(state);
+            updateLabels();
             break;
 
         case 3:

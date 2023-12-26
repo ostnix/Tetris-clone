@@ -1,21 +1,30 @@
 #ifndef __HIGH_SCORE_H__
 #define __HIGH_SCORE_H__
 
+#include <json.h>
 #include "settings.h"
 #include "render.h"
 
+struct NamesList {
+    char name[HIGH_SCORE_PLAYERS_NUMBER][MAX_TEXT_CHARS];
+    unsigned int score[HIGH_SCORE_PLAYERS_NUMBER];
+};
+
 class HighScore {
 public:
-    static State show(Render* _render, State _state);
-    static void writeNewRecord(Render* _render);
-    static void getTable();
+    HighScore(Render* _render);
+    ~HighScore();
 
-private: 
-    static NamesList loadTable();
-    static bool saveTable(NamesList names_list);
-    static bool updateTable(NamesList names_list);
+    void show(State _state);
+    void checkForNewRecord(unsigned int score);
 
-    HighScore();
+private:
+    void load();
+    void save();
+
+    NamesList names_list;
+    Render* render;
+;
 };
 
 
