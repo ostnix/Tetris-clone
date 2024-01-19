@@ -1,10 +1,8 @@
 #ifndef __RENDER_H__
 #define __RENDER_H__
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <cassert>
+#include "utils.h"
 
 #ifdef _WIN32
     #include "SDL.h"
@@ -18,110 +16,87 @@
 
 #include "tetromino.h"
 
-typedef int LabelId;
+//typedef int LabelId;
+typedef int BlockId;
+typedef int TextId;
+typedef int BoxId;
+typedef int LayerId;
+typedef int ObjectId;
+
 enum class FontType {Normal, Big};
+enum class RenderObjectType {None, Block, Text, Box, Layer, Custom};
+enum class Color {None, Grey, White, Red, Green, Blue, Black, Transparent};
+
+struct Block {
+    int col, row;
+};
+
+struct Screen { // for special cases(smooth movement for example)
+    int x, y;
+}; 
+
+struct BlockRect {
+    int col, row;
+    int end_col, end_row;
+};
+
+struct ScreenRect {
+    int x, y;
+    int w, h;
+};
 
 static const unsigned int HIGH_SCORE_PLAYERS_NUMBER = 5;
-static const unsigned int MAXIMUM_NUM_OF_LABELS = 15;
-static const unsigned int MAX_TEXT_CHARS = 15;
+//static const unsigned int MAXIMUM_NUM_OF_LABELS = 15;
+static const unsigned int MAX_TEXT_CHARS = 30;
 static const unsigned int BORDER_SIZE = 60;
 static const unsigned int BLOCK_SIZE = 60;
-static const unsigned int MAX_COLORS = 9;
-static const unsigned int BLOCKED_COLOR = 8;
+static const unsigned int MAX_COLORS = 10;
+static const unsigned int MAX_LAYERS = 10;
+static const unsigned int MAX_TEXTS = 20;
+//static const unsigned int BLOCKED_COLOR = 8;
+
+void concat_strings(char* result, const char* str1, const char* str2);
+
+struct Layer {
+    SDL_Texture* texture;
+    SDL_Rect rect;
+};
 
 class Render {
 public:
-    Render(int width, int height);
+    Render(int width, int height, const char* path_to_textures = "./textures/default");
     ~Render();
 
-    void renderGame(const unsigned int grid[10][20], 
-                    const Tetromino& tetromino, 
-                    const Tetromino& next_tetromino, 
-                    const Tetromino& holded_tetromino,
-                    const Tetromino& shadow_tetromino,
-                    bool show_next_tetromino);
+    Screen blockToScreen(Block coord);
+    ScreenRect blockToScreen(BlockRect b);
     
-    LabelId addLabel(FontType font_type, unsigned int number, SDL_Color color, SDL_Point point);
-    LabelId addLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
-    void popupLabel(FontType font_type, const char* text, SDL_Color color, SDL_Point point);
-    void updateLabel(unsigned int number, unsigned int label_index);
-    void updateLabel(const char* text, unsigned int label_index);
-    void updateLabel(const char* text, unsigned int label_index, SDL_Color color);
-    void renderOnlyLables();
-    void clearLabels();
-    void showCursor(SDL_Point point);
+    void renderLayers();
+    void renderLayer(LayerId id);
 
-    const SDL_Color gray = {200, 200, 200};
-    const SDL_Color white = {250, 250, 250};
-    const SDL_Color red = {250, 50, 50};
-    const SDL_Color green = {50, 250, 50};
-    const SDL_Color blue = {50, 50, 250};
+    LayerId createLayer(ScreenRect rect);
+    bool clearLayer(LayerId id);
+    bool changeLayerPriority(LayerId id, LayerId new_id);
+    bool putOnLayer(LayerId layer_id, RenderObjectType object_type, ObjectId id, Screen p, unsigned char transparency = 255);
+    bool putOnLayer(LayerId layer_id, RenderObjectType object_type, ObjectId id, ScreenRect rect, unsigned char transparency = 255);
+    bool deleteLayer(LayerId id);
+
+    TextId createText(FontType font_type, int number, Color color);
+    TextId createText(FontType font_type, const char* text, Color color);
+    bool updateText(TextId id, FontType font_type, unsigned int number, Color color);
+    bool updateText(TextId id, FontType font_type, const char* text, Color color);
+    bool deleteText(TextId id);
+
+    /*
+    BoxId createBox(Color background_color, ScreenRect size);
+    BoxId createBox(ObjectId id, RenderObjectType background_object_type, ScreenRect size);
+    bool deleteBox(BoxId id);
+    */
 
 private:
-    struct Label {
-        Label(SDL_Renderer* _renderer, TTF_Font* _font, const char* _text, SDL_Color _color) : font(_font), color(_color) {
-            surface = TTF_RenderUTF8_Solid(font, _text, _color);
-            texture = SDL_CreateTextureFromSurface(_renderer, surface);
-        }
+    SDL_Color getColor(Color color);
 
-        Label(SDL_Renderer* _renderer, TTF_Font* _font, const char* _text, SDL_Color _color, SDL_Point _point) : Label(_renderer, _font, _text, _color) {
-            point = _point;
-        }
-
-        ~Label() {
-            SDL_DestroyTexture(texture);
-            SDL_FreeSurface(surface);
-        }
-
-        void updateText(SDL_Renderer* _renderer, const char* _text) {
-            updateText(_renderer, font, _text, color);
-        }
-
-        void updateText(SDL_Renderer* _renderer, const char* _text, SDL_Color _color) {
-            updateText(_renderer, font, _text, _color);
-        }
-
-        void updateText(SDL_Renderer* _renderer, TTF_Font* _font, const char* _text, SDL_Color _color) {
-            SDL_DestroyTexture(texture);
-            SDL_FreeSurface(surface);           
-            
-            surface = TTF_RenderUTF8_Solid(_font, _text, _color); 
-            texture = SDL_CreateTextureFromSurface(_renderer, surface);
-        }
-
-        void render(SDL_Renderer* _renderer) {
-            if (!surface || !texture) {
-                return;
-            }
-
-            SDL_Rect rect = {point.x, point.y, surface->w, surface->h};
-            SDL_RenderCopy(_renderer, texture, NULL, &rect);
-        }
-
-        void render(SDL_Renderer* _renderer, SDL_Point p) {
-            SDL_Rect rect = {p.x, p.y, surface->w, surface->h};
-            SDL_RenderCopy(_renderer, texture, NULL, &rect);
-        }
-
-        TTF_Font* font; 
-        SDL_Color color;
-
-        SDL_Point point = {0, 0};
-        //SDL_Point getSufaceSize() {return {surface->w, surface->h};}
-
-        SDL_Surface* surface;
-        SDL_Texture* texture;
-    };
-
-    bool loadTextures();
+    bool loadTextures(const char* path_to_textures);
     bool loadFonts();
-
-    void renderBackground();
-    void renderBorders();
-    void renderLabels();
-    
-    void renderGrid(const unsigned int grid[10][20]);
-    void renderTetromino(const Tetromino& tetromino, bool in_grid_bounds, bool transparent);
 
     int window_width;
     int window_height;
@@ -132,18 +107,18 @@ private:
 
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
-    SDL_Texture* background_texture;
-    SDL_Texture* borders_texture;
-    SDL_Texture* block_colors[MAX_COLORS];
-    SDL_Texture* cursor;
 
-    Label* labels[MAXIMUM_NUM_OF_LABELS] = {NULL};
-    unsigned int num_of_added_labels = 0;
+    SDL_Texture* block_colors[MAX_COLORS] = {NULL};
+    SDL_Texture* custom_textures[3] = {NULL};
+    SDL_Texture* texts[MAX_TEXTS] = {NULL};
+    
+    unsigned int num_of_texts = 0;
+    
+    Layer* layers[MAX_LAYERS] = {NULL};
+    unsigned int num_of_layers = 0;
 
     TTF_Font* font; 
     TTF_Font* font_big;
-
-
 };
 
 #endif /* __RENDER_H__ */

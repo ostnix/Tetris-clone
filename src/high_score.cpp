@@ -8,6 +8,16 @@ HighScore::~HighScore() {
     save();
 }
 
+bool HighScore::checkForNewRecord(State& state) {
+    return false;
+}
+
+/*
+const RecordsList& HighScore::getRecords() {
+    return records_list;
+}
+*/
+/*
 void HighScore::show(State _state) {
     State state = _state;
     assert(render);
@@ -35,11 +45,13 @@ void HighScore::show(State _state) {
 }
 
 void HighScore::checkForNewRecord(State& state) {
-    if (records_list[HIGH_SCORE_PLAYERS_NUMBER - 1].score < state.score)
-        writeNewRecord(state);
+    //if (records_list[HIGH_SCORE_PLAYERS_NUMBER - 1].score < state.score)
+    //    writeNewRecord(state);
 }
-
+*/
+/*
 void HighScore::writeNewRecord(State& state) {
+
     char player_name[MAX_TEXT_CHARS] = {'\0'};
 
     render->clearLabels();
@@ -110,6 +122,7 @@ void HighScore::writeNewRecord(State& state) {
     }
     
 }
+*/
 
 void HighScore::load() {
     json_object* root = json_object_from_file("HighScores.json");

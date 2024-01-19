@@ -1,69 +1,39 @@
 #ifndef __GAME_H__
 #define __GAME_H__
 
-#include <cstdlib>
-#include <ctime>
 #include "settings.h"
 #include "tetromino.h"
 #include "render.h"
-#include "menu.h"
 
 class Game {
 public:
     Game(int width, int height);
-    Game(int width, int height, unsigned int start_level);
     ~Game();
 
-    void start();
-    
+    void draw(State& state);
+
+    void updateGrid(State& state);
+    void updateScreen(State& state);
+
 private:
-    void createLabels();
-    void gameLoop();
-    void keyPressHandler();
+    void updateBackground();
+    void showPause();
+    void createTexts();
+    void putTetromino(Tetromino& tetromino, LayerId id);
 
-    bool spawnTetromino();
-    void holdTetromino();
-    void generateNextTetromino();
-    void placeTetromino();
-    void createShadow();
-    void projectShadow();
-    void rotateCounterClockwise();
-    void moveLeft();
-    void moveRight();
-    void moveDown();
-    void dropInstantly();
-    void cleanFilledLines();
-    void updateScoreAndLevel(int filled_lines);
-    bool isLineFilled(int row);
-    bool isValidPosition(const Tetromino& _tetromino);
-    bool isValidPosition(int col, int row);
-    bool isValidRotation(int blocks[4][2]); 
- 
+    enum Texts {Next = 0, Holded = 1, Pause = 2, Score = 3, Level = 4, ScoreVal = 5, 
+                LevelVal = 6, NewGame = 7, Settings = 8, HighScore = 9, Exit = 10, 
+                Resume = 11, MainMenu = 12, On = 13, Off = 14, Shadow = 15};
 
-    Tetromino tetromino;
-    Tetromino next_tetromino;
-    Tetromino holded_tetromino;
-    Tetromino shadow_tetromino;
-    int score_label_index = -1;
-    int level_label_index = -1;
+    LayerId game_view = -1;
+    LayerId game_grid = -1;
+    LayerId ingame_menu = -1;
+    LayerId main_menu = -1;
 
-    unsigned int grid[10][20] = {0}; 
-    int lines_per_level[30] =   {
-                                10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-                                100, 100, 100, 100, 100, 100, 110, 120, 130, 140,
-                                150, 160, 170, 180, 190, 200, 200, 200, 200, 200
-                                };
-    unsigned int move_delay_per_level[30] = {
-                                            48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
-                                            5, 5, 5, 4, 4, 4, 3, 3, 3, 2,
-                                            2, 2, 2, 2, 2, 2, 2, 2, 2, 1
-                                            };
-    State state;
-    HighScore* high_score;
-    Menu* menu;
+    TextId texts[MAX_TEXTS] = {-1};
+
     Render* render;
 };
-
 
 
 #endif /* __GAME_H__ */
