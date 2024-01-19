@@ -60,6 +60,7 @@ void concat_strings(char* result, const char* str1, const char* str2);
 struct Layer {
     SDL_Texture* texture;
     SDL_Rect rect;
+    bool is_visible = true;
 };
 
 class Render {
@@ -74,6 +75,7 @@ public:
     void renderLayer(LayerId id);
 
     LayerId createLayer(ScreenRect rect);
+    bool setLayerVisibility(LayerId id, bool is_visible);
     bool clearLayer(LayerId id);
     bool changeLayerPriority(LayerId id, LayerId new_id);
     bool putOnLayer(LayerId layer_id, RenderObjectType object_type, ObjectId id, Screen p, unsigned char transparency = 255);

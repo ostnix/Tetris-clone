@@ -16,7 +16,7 @@ public:
 private:
     void gameLoop();
     void handlePlayerAction();
-    void workoutGameContext();
+    void gameStep();
 
     State state;
     Input input;

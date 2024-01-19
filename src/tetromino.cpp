@@ -24,7 +24,6 @@ Tetromino::Tetromino(const Tetromino& tetromino) {
 Tetromino& Tetromino::operator=(const Tetromino& tetromino) {
     num_of_cells = tetromino.num_of_cells;
     type = tetromino.type;
-    //setColRow(tetromino.)
 
     for (int i = 0; i < num_of_cells; i++) {
         cells[i] = tetromino.cells[i];

@@ -3,7 +3,7 @@
 Tetris::Tetris(int width, int height, unsigned int start_level) {
     game = new GameView(width, height);
     game_logic = new GameLogic(state);
-    state.context = MenuType::Game;
+    state.context = MenuType::MainMenu;
 
     if (start_level <= 29) {
         state.level = start_level;
@@ -23,13 +23,11 @@ void Tetris::start() {
 }
 
 void Tetris::gameLoop() {
-    state.delay = move_delay_per_level[state.level];
-    game_logic->start();
     game->updateScreen(state);
 
     while(!state.quit_game) {
         handlePlayerAction();
-        workoutGameContext();
+        gameStep();
         timer.wait();
     }
 }
@@ -114,13 +112,13 @@ void Tetris::handlePlayerAction() {
 
             case PlayerAction::Enter:
                 switch (state.cursor_position) {
+                case 0:
+                    break;
+
                 case 1:
                     break;
 
                 case 2:
-                    break;
-
-                case 3:
                     break;
                 }
                 break;
@@ -128,15 +126,88 @@ void Tetris::handlePlayerAction() {
             break;
 
         case MenuType::MainMenu:
+            switch (last_action) {
+            case PlayerAction::Up:
+                state.cursor_position = (state.cursor_position - 1) % 4;
+                game->updateScreen(state);
+                break;
+
+            case PlayerAction::Down:
+                state.cursor_position = (state.cursor_position + 1) % 4;
+                game->updateScreen(state);
+                break;
+
+            case PlayerAction::Enter:
+                switch (state.cursor_position) {
+                case 0:
+                    state.delay = move_delay_per_level[state.level];
+                    state.context = MenuType::Game;
+                    game->updateScreen(state);
+                    game_logic->start();
+                    break;
+
+                case 1:
+                    state.cursor_position = 0;
+                    state.context = MenuType::Settings;
+                    game->updateScreen(state);
+                    break;
+
+                case 2:
+
+                    break;
+
+                case 3:
+                    state.quit_game = true;
+                    break;
+                }
+                break;
+            }
             break;
 
+
         case MenuType::Settings:
+            switch (last_action) {
+            case PlayerAction::Up:
+                state.cursor_position = (state.cursor_position - 1) % 4;
+                game->updateScreen(state);
+                break;
+
+            case PlayerAction::Down:
+                state.cursor_position = (state.cursor_position + 1) % 4;
+                game->updateScreen(state);
+                break;
+
+            case PlayerAction::Enter:
+                switch (state.cursor_position) {
+                case 0:
+                    state.shadow_enabled = !state.shadow_enabled;
+                    game->updateScreen(state);
+                    break;
+
+                case 1:
+                    state.hold_enabled = !state.hold_enabled;
+                    game->updateScreen(state);
+                    break;
+
+                case 2:
+                    state.show_next_piece_enabled != state.show_next_piece_enabled;
+                    game->updateScreen(state);
+                    break;
+
+                case 3:
+                    state.cursor_position = 0;
+                    state.context = MenuType::MainMenu;
+                    game->updateScreen(state);
+                    break;
+                }
+                break;
+            }
             break;
         } 
     }
 }
 
-void Tetris::workoutGameContext() {
+void Tetris::gameStep() {
     if (state.paused)
         return;
 
@@ -174,8 +245,5 @@ void Tetris::workoutGameContext() {
         }
         game->draw(state);
         state.delay--;
-    }
-    else {
-        game->updateScreen(state);
     }
 }

@@ -3,13 +3,14 @@
 GameView::GameView(int width, int height) {
     render = new Render(width, height);
 
-    main_menu = render->createLayer({0, 0, width, height});
+    //main_menu = render->createLayer({0, 0, width, height});
     game_view = render->createLayer({0, 0, width, height});
     createTexts();
-    updateBackground(); 
+    redrawBackground(); 
 
     game_grid = render->createLayer(render->blockToScreen(BlockRect{1, 1, 10, 20}));
     ingame_menu = render->createLayer(render->blockToScreen(BlockRect{5, 5, 15, 15}));
+    render->setLayerVisibility(ingame_menu, false);
 }
 
 GameView::~GameView() {
@@ -63,7 +64,7 @@ void GameView::updateScreen(State& state) {
             state.update_level = false;
         }
 
-        updateBackground();
+        redrawBackground();
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{12, 5}));
         state.tetrominoes[NEXT].setColRow(18, 5);
         putTetromino(state.tetrominoes[NEXT], game_view);
@@ -81,18 +82,50 @@ void GameView::updateScreen(State& state) {
         break;
     
     case MenuType::MainMenu:
+        render->clearLayer(game_view);
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::NewGame], render->blockToScreen(Block{7, 4}));
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Settings], render->blockToScreen(Block{7, 7}));
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::HighScore], render->blockToScreen(Block{7, 10}));
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Exit], render->blockToScreen(Block{7, 13}));
+        render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 4 + state.cursor_position * 3}));
+        render->renderLayer(game_view);
         break;
     
     case MenuType::Settings:
+        render->clearLayer(game_view);
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Settings], render->blockToScreen(Block{6, 1}));
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Shadow], render->blockToScreen(Block{7, 4}));
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Holded], render->blockToScreen(Block{7, 6}));
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{7, 8}));
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Back], render->blockToScreen(Block{7, 10}));
+        if (state.shadow_enabled) {
+            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 4}));
+        }
+        else {
+            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 4}));
+        }
+        
+        if (state.hold_enabled) {
+            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 6}));
+        }
+        else {
+            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 6}));
+        }
+
+        if (state.show_next_piece_enabled) {
+            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 8}));
+        }
+        else {
+            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 8}));
+        }
+
+        render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 6 + state.cursor_position * 2}));
+        render->renderLayer(game_view);
         break;
     }
 }
 
-void GameView::updateBackground() {
+void GameView::redrawBackground() {
     render->clearLayer(game_view);
     render->putOnLayer(game_view, RenderObjectType::Custom, 0, {0, 0, 650, 650});
 
@@ -121,7 +154,6 @@ void GameView::showPause() {
 }
 
 void GameView::createTexts() {
-    texts[Texts::Holded] = render->createText(FontType::Normal, "Holded:", Color::Grey);
     texts[Texts::Next] = render->createText(FontType::Normal, "Next:", Color::Grey);
     texts[Texts::Score] = render->createText(FontType::Normal, "Score:", Color::Grey);
     texts[Texts::ScoreVal] = render->createText(FontType::Normal, 0, Color::Grey);
@@ -129,6 +161,7 @@ void GameView::createTexts() {
     texts[Texts::LevelVal] = render->createText(FontType::Normal, 0, Color::Grey);
     texts[Texts::Holded] = render->createText(FontType::Normal, "Holded:", Color::Grey);
     texts[Texts::Shadow] = render->createText(FontType::Normal, "Shadow:", Color::Grey);
+    texts[Texts::Back] = render->createText(FontType::Normal, "Back", Color::Grey);
 
     texts[Texts::On] = render->createText(FontType::Normal, "On", Color::Green);
     texts[Texts::Off] = render->createText(FontType::Normal, "Off", Color::Red);;
@@ -151,7 +184,6 @@ void GameView::putTetromino(Tetromino& tetromino, LayerId id) {
                 (unsigned int)tetromino.cells[i].cell_color,
                 render->blockToScreen(block),
                 tetromino.cells[i].transparency);
-
         }
     }
 }

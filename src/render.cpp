@@ -47,7 +47,8 @@ void Render::renderLayers() {
     
     SDL_RenderClear(renderer);
     for (int i = 0; i < num_of_layers; i++) {
-        SDL_RenderCopy(renderer, layers[i]->texture, NULL, &layers[i]->rect);
+        if (layers[i]->is_visible)
+            SDL_RenderCopy(renderer, layers[i]->texture, NULL, &layers[i]->rect);
     }
     SDL_RenderPresent(renderer);
 }
@@ -80,6 +81,14 @@ LayerId Render::createLayer(ScreenRect rect) {
     num_of_layers++;
 
     return num_of_layers - 1;
+}
+
+bool Render::setLayerVisibility(LayerId id, bool is_visible) {
+    if (id < 0 || id >= num_of_layers)
+        return false;
+
+    layers[id]->is_visible = is_visible;
+    return true;
 }
 
 bool Render::clearLayer(LayerId id) {
