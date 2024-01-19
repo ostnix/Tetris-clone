@@ -1,6 +1,6 @@
 #include "game.h"
 
-Game::Game(int width, int height) {
+GameView::GameView(int width, int height) {
     render = new Render(width, height);
 
     main_menu = render->createLayer({0, 0, width, height});
@@ -12,11 +12,11 @@ Game::Game(int width, int height) {
     ingame_menu = render->createLayer(render->blockToScreen(BlockRect{5, 5, 15, 15}));
 }
 
-Game::~Game() {
+GameView::~GameView() {
     delete render;
 }
 
-void Game::draw(State& state) {
+void GameView::draw(State& state) {
     if (state.paused) {
         render->putOnLayer(game_view, RenderObjectType::Layer, game_grid, render->blockToScreen(BlockRect{1, 1, 10, 20}));
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Pause], render->blockToScreen(Block{8, 10}));
@@ -30,7 +30,7 @@ void Game::draw(State& state) {
     render->renderLayers();
 }
 
-void Game::updateGrid(State& state) {
+void GameView::updateGrid(State& state) {
     render->clearLayer(game_grid);
     render->putOnLayer(game_grid, RenderObjectType::Custom, 2, render->blockToScreen(BlockRect{0, 0, 10, 20}));
 
@@ -50,7 +50,7 @@ void Game::updateGrid(State& state) {
     putTetromino(state.tetrominoes[SHADOW], game_grid);
 }
 
-void Game::updateScreen(State& state) {
+void GameView::updateScreen(State& state) {
     switch (state.context) {
     case MenuType::Game:
         if (state.update_score) {
@@ -92,7 +92,7 @@ void Game::updateScreen(State& state) {
     }
 }
 
-void Game::updateBackground() {
+void GameView::updateBackground() {
     render->clearLayer(game_view);
     render->putOnLayer(game_view, RenderObjectType::Custom, 0, {0, 0, 650, 650});
 
@@ -116,11 +116,11 @@ void Game::updateBackground() {
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::LevelVal], render->blockToScreen(Block{16, 3}));
 }
 
-void Game::showPause() {
+void GameView::showPause() {
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Pause], render->blockToScreen(Block{8, 10}));
 }
 
-void Game::createTexts() {
+void GameView::createTexts() {
     texts[Texts::Holded] = render->createText(FontType::Normal, "Holded:", Color::Grey);
     texts[Texts::Next] = render->createText(FontType::Normal, "Next:", Color::Grey);
     texts[Texts::Score] = render->createText(FontType::Normal, "Score:", Color::Grey);
@@ -142,7 +142,7 @@ void Game::createTexts() {
     texts[Texts::Pause] = render->createText(FontType::Big, "PAUSE", Color::Grey);
 }
 
-void Game::putTetromino(Tetromino& tetromino, LayerId id) {
+void GameView::putTetromino(Tetromino& tetromino, LayerId id) {
     if (tetromino.getColor() != CellColor::None) {
         for (int i = 0; i < tetromino.num_of_cells; i++) {
             Block block{tetromino.cells[i].col, tetromino.cells[i].row};

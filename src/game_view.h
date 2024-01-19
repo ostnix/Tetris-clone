@@ -1,14 +1,14 @@
-#ifndef __GAME_H__
-#define __GAME_H__
+#ifndef __GAME_VIEW_H__
+#define __GAME_VIEW_H__
 
 #include "settings.h"
 #include "tetromino.h"
 #include "render.h"
 
-class Game {
+class GameView {
 public:
-    Game(int width, int height);
-    ~Game();
+    GameView(int width, int height);
+    ~GameView();
 
     void draw(State& state);
 
@@ -36,4 +36,4 @@ private:
 };
 
 
-#endif /* __GAME_H__ */
+#endif /* __GAME_VIEW_H__ */

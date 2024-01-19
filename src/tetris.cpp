@@ -1,7 +1,7 @@
 #include "tetris.h"
 
 Tetris::Tetris(int width, int height, unsigned int start_level) {
-    game = new Game(width, height);
+    game = new GameView(width, height);
     game_logic = new GameLogic(state);
     state.context = MenuType::Game;
 

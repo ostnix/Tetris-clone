@@ -22,7 +22,7 @@ private:
     Input input;
     Timer timer;
 
-    Game* game;
+    GameView* game;
     GameLogic* game_logic;
 
     unsigned int move_delay_per_level[30] = {
