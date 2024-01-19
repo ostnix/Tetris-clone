@@ -26,7 +26,7 @@ struct State {
     unsigned int score = 0;
     unsigned int level = 0;
     int cursor_position = 0;
-    //unsigned int delay = 0;
+    int delay = 0;
     //unsigned int backup_color = 1;
 
     bool quit_game = false;

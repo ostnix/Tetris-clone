@@ -1,4 +1,4 @@
-#include "game.h"
+#include "game_view.h"
 
 GameView::GameView(int width, int height) {
     render = new Render(width, height);

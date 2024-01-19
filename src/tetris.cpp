@@ -23,7 +23,7 @@ void Tetris::start() {
 }
 
 void Tetris::gameLoop() {
-    unsigned int delay = move_delay_per_level[state.level];
+    state.delay = move_delay_per_level[state.level];
     game_logic->start();
     game->updateScreen(state);
 
@@ -145,7 +145,7 @@ void Tetris::workoutGameContext() {
             game->updateScreen(state);
         }
 
-        if (delay == 0 || state.soft_drop || state.instant_drop) {
+        if (state.delay == 0 || state.soft_drop || state.instant_drop) {
             if (state.instant_drop) {
                 state.instant_drop = false;
 
@@ -170,10 +170,10 @@ void Tetris::workoutGameContext() {
             }
 
             game->updateGrid(state);
-            delay = move_delay_per_level[state.level];
+            state.delay = move_delay_per_level[state.level];
         }
         game->draw(state);
-        delay--;      
+        state.delay--;
     }
     else {
         game->updateScreen(state);

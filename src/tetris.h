@@ -3,7 +3,7 @@
 
 #include "timer.h"
 #include "input.h"
-#include "game.h"
+#include "game_view.h"
 #include "game_logic.h"
 
 class Tetris {
