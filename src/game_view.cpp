@@ -3,7 +3,6 @@
 GameView::GameView(int width, int height) {
     render = new Render(width, height);
 
-    //main_menu = render->createLayer({0, 0, width, height});
     game_view = render->createLayer({0, 0, width, height});
     createTexts();
     redrawBackground(); 
@@ -54,25 +53,7 @@ void GameView::updateGrid(State& state) {
 void GameView::updateScreen(State& state) {
     switch (state.context) {
     case MenuType::Game:
-        if (state.update_score) {
-            render->updateText(texts[Texts::ScoreVal], FontType::Normal, state.score, Color::Grey);
-            state.update_score = false;
-        }
-        
-        if (state.update_level) {
-            render->updateText(texts[Texts::LevelVal], FontType::Normal, state.level, Color::Grey);
-            state.update_level = false;
-        }
-
-        redrawBackground();
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{12, 5}));
-        state.tetrominoes[NEXT].setColRow(18, 5);
-        putTetromino(state.tetrominoes[NEXT], game_view);
-
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Holded], render->blockToScreen(Block{12, 9}));
-        state.tetrominoes[HOLDED].setColRow(18, 9);
-        putTetromino(state.tetrominoes[HOLDED], game_view);
-
+        drawGame(state);
         break;
 
     case MenuType::HighScore:
@@ -82,46 +63,11 @@ void GameView::updateScreen(State& state) {
         break;
     
     case MenuType::MainMenu:
-        render->clearLayer(game_view);
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::NewGame], render->blockToScreen(Block{7, 4}));
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Settings], render->blockToScreen(Block{7, 7}));
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::HighScore], render->blockToScreen(Block{7, 10}));
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Exit], render->blockToScreen(Block{7, 13}));
-        render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 4 + state.cursor_position * 3}));
-        render->renderLayer(game_view);
+        drawMainMenu(state);
         break;
     
     case MenuType::Settings:
-        render->clearLayer(game_view);
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Settings], render->blockToScreen(Block{6, 1}));
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Shadow], render->blockToScreen(Block{7, 4}));
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Holded], render->blockToScreen(Block{7, 6}));
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{7, 8}));
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Back], render->blockToScreen(Block{7, 10}));
-
-        if (state.shadow_enabled) {
-            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 4}));
-        }
-        else {
-            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 4}));
-        }
-        
-        if (state.hold_enabled) {
-            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 6}));
-        }
-        else {
-            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 6}));
-        }
-
-        if (state.show_next_piece_enabled) {
-            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 8}));
-        }
-        else {
-            render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 8}));
-        }
-
-        render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 6 + state.cursor_position * 2}));
-        render->renderLayer(game_view);
+        drawSettings(state);
         break;
     }
 }
@@ -187,4 +133,69 @@ void GameView::putTetromino(Tetromino& tetromino, LayerId id) {
                 tetromino.cells[i].transparency);
         }
     }
+}
+
+void GameView::drawGame(State& state) {
+    if (state.update_score) {
+        render->updateText(texts[Texts::ScoreVal], FontType::Normal, state.score, Color::Grey);
+        state.update_score = false;
+    }
+    
+    if (state.update_level) {
+        render->updateText(texts[Texts::LevelVal], FontType::Normal, state.level, Color::Grey);
+        state.update_level = false;
+    }
+
+    redrawBackground();
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{12, 5}));
+    state.tetrominoes[NEXT].setColRow(18, 5);
+    putTetromino(state.tetrominoes[NEXT], game_view);
+
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Holded], render->blockToScreen(Block{12, 9}));
+    state.tetrominoes[HOLDED].setColRow(18, 9);
+    putTetromino(state.tetrominoes[HOLDED], game_view);
+}
+
+void GameView::drawMainMenu(State& state) {
+    render->clearLayer(game_view);
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::NewGame], render->blockToScreen(Block{7, 4}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Settings], render->blockToScreen(Block{7, 7}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::HighScore], render->blockToScreen(Block{7, 10}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Exit], render->blockToScreen(Block{7, 13}));
+    render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 4 + state.cursor_position * 3}));
+    render->renderLayer(game_view);
+
+}
+
+void GameView::drawSettings(State& state) {
+    render->clearLayer(game_view);
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Settings], render->blockToScreen(Block{6, 1}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Shadow], render->blockToScreen(Block{7, 4}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Holded], render->blockToScreen(Block{7, 6}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{7, 8}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Back], render->blockToScreen(Block{7, 10}));
+    
+    if (state.shadow_enabled) {
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 4}));
+    }
+    else {
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 4}));
+    }
+        
+    if (state.hold_enabled) {
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 6}));
+    }
+    else {
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 6}));
+    }
+
+    if (state.show_next_piece_enabled) {
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 8}));
+    }
+    else {
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 8}));
+    }
+
+    render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 6 + state.cursor_position * 2}));
+    render->renderLayer(game_view);
 }

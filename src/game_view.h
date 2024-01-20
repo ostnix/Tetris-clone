@@ -20,6 +20,10 @@ private:
     void showPause();
     void createTexts();
     void putTetromino(Tetromino& tetromino, LayerId id);
+    void drawGame(State& state);
+    void drawMainMenu(State& state);
+    void drawSettings(State& state);
+
 
     enum Texts {Next = 0, Holded = 1, Pause = 2, Score = 3, Level = 4, ScoreVal = 5, 
                 LevelVal = 6, NewGame = 7, Settings = 8, HighScore = 9, Exit = 10, 

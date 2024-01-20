@@ -1,7 +1,13 @@
 #ifndef __HIGH_SCORE_H__
 #define __HIGH_SCORE_H__
 
+
+#ifdef _WIN32
 #include <json.h>
+#elif __linux__
+#include <json-c/json.h>
+#endif
+
 #include "settings.h"
 #include "render.h"
 
