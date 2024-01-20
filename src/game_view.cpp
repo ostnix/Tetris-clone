@@ -98,6 +98,7 @@ void GameView::updateScreen(State& state) {
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Holded], render->blockToScreen(Block{7, 6}));
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{7, 8}));
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Back], render->blockToScreen(Block{7, 10}));
+
         if (state.shadow_enabled) {
             render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::On], render->blockToScreen(Block{12, 4}));
         }
