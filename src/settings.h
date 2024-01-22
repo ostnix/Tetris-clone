@@ -38,6 +38,7 @@ struct State {
     bool instant_drop = false;
     bool update_score = false;
     bool update_level = false;
+    bool new_high_score = false;
     
     PlayerAction last_player_action = PlayerAction::None;
     MenuType context = MenuType::MainMenu;

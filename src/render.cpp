@@ -5,6 +5,15 @@ void concat_strings(char* result, const char* str1, const char* str2) {
     strcat(result, str2);
 }
 
+void add_to_string(char* result, const char* str) {
+    strcat(result, str);
+}
+
+void add_num(char* result, const int number) {
+    char text[MAX_TEXT_CHARS + sizeof(char)];
+    sprintf(text, "%d", number);
+    strcat(result, text);
+}
 
 Render::Render(int width, int height, const char* path_to_textures) : window_width(width), window_height(height) {
     TTF_Init();

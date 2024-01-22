@@ -3,7 +3,7 @@
 GameView::GameView(int width, int height) {
     
     for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
-        records[i] = -1;
+        records_text[i] = -1;
     }
 
     for (int i = 0; i < MAX_TEXTS; i++) {
@@ -230,19 +230,20 @@ void GameView::drawHighScore(State& state) {
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::HighScore], render->blockToScreen(Block{7, 2}));
     
     for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
-        if (records[i] == -1) {
-            records[i] = render->createText(FontType::Normal, state.records[i].name, Color::Blue);
-            render->putOnLayer(game_view, RenderObjectType::Text, records[i], render->blockToScreen(Block{7, 4 + i * 2}));
+        if (records_text[i] == -1) {
+            char record[MAX_TEXT_CHARS] = {'\0'};
+            concat_strings(record, state.records[i].name, ": ");
+            add_num(record, state.records[i].score);
+            records_text[i] = render->createText(FontType::Normal, record, Color::Blue);
         }
-        else {
-            render->putOnLayer(game_view, RenderObjectType::Text, records[i], render->blockToScreen(Block{7, 4 + i * 2}));
+        else if (state.new_high_score) {
+            char record[MAX_TEXT_CHARS] = {'\0'};
+            concat_strings(record, state.records[i].name, ": ");
+            add_num(record, state.records[i].score);
+            records_text[i] = render->updateText(records_text[i], FontType::Normal, record, Color::Blue);
         }
+
+        render->putOnLayer(game_view, RenderObjectType::Text, records_text[i], render->blockToScreen(Block{7, 5 + i * 2}));
     }
     render->renderLayer(game_view);
 }
-
-/*
-Screen GameView::getCursorPosition(Screen init_pos, int step_size, unsigned int items_in_menu, unsigned int position) {
-    return Screen{0, 0};
-}
-*/

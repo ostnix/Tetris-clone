@@ -26,9 +26,6 @@ private:
     void drawMainMenu(State& state);
     void drawSettings(State& state);
     void drawHighScore(State& state);
-    
-    //Screen getCursorPosition(Screen init_pos, int step_size, unsigned int items_in_menu, unsigned int position);
-
 
     enum Texts {Next = 0, Holded = 1, Pause = 2, Score = 3, Level = 4, ScoreVal = 5, 
                 LevelVal = 6, NewGame = 7, Settings = 8, HighScore = 9, Exit = 10, 
@@ -39,8 +36,8 @@ private:
     LayerId ingame_menu = -1;
     LayerId main_menu = -1;
 
-    TextId records[HIGH_SCORE_PLAYERS_NUMBER];
-    TextId texts[MAX_TEXTS];
+    TextId records_text[HIGH_SCORE_PLAYERS_NUMBER] = {};
+    TextId texts[MAX_TEXTS] = {};
 
     Render* render;
 };

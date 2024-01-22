@@ -54,6 +54,8 @@ static const unsigned int MAX_TEXTS = 30;
 //static const unsigned int BLOCKED_COLOR = 8;
 
 void concat_strings(char* result, const char* str1, const char* str2);
+void add_to_string(char* result, const char* str);
+void add_num(char* result, const int number);
 
 struct Layer {
     SDL_Texture* texture;
