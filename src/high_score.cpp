@@ -1,54 +1,46 @@
 #include "high_score.h"
 
-HighScore::HighScore(Render* _render) : render(_render) {
+HighScore::HighScore() {
     load();
 }
 
 HighScore::~HighScore() {
+    //save();
+}
+
+void HighScore::writeNewRecord(const char* name, unsigned int score) {
+    Record best_score;
+    best_score.score = score;
+    strcpy(best_score.name, name);
+
+    for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
+        if (records[i].score < best_score.score) {
+            Record temp;
+            temp.score = records[i].score;
+            strcpy(temp.name, records[i].name);
+
+            records[i].score = best_score.score;
+            strcpy(records[i].name, best_score.name);
+
+            best_score.score = temp.score;
+            strcpy(best_score.name, temp.name);
+        }
+    }
+
     save();
 }
 
-bool HighScore::checkForNewRecord(State& state) {
+bool HighScore::checkForNewRecord(unsigned int score) {
+    if (records[HIGH_SCORE_PLAYERS_NUMBER - 1].score < score)
+        return true;
+
     return false;
 }
 
-/*
-const RecordsList& HighScore::getRecords() {
-    return records_list;
-}
-*/
-/*
-void HighScore::show(State _state) {
-    State state = _state;
-    assert(render);
-
-    bool key_pressed = false;
-
-    render->clearLabels();
-    render->addLabel(FontType::Big, "HIGH SCORES:", render->white, {4, 1});
-    for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
-        render->addLabel(FontType::Normal, records_list[i].name, render->blue, {6, 5 + i * 2});
-        render->addLabel(FontType::Normal, records_list[i].score, render->blue, {14, 5 + i * 2});
-    }
-
-    while (!key_pressed) {
-        SDL_Delay(state.delay);
-        render->renderOnlyLables();
-
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_KEYDOWN || event.type == SDL_QUIT) {
-                key_pressed = true;
-            }
-        }
-    }
+const Record* HighScore::getRecords() {
+    return records;
 }
 
-void HighScore::checkForNewRecord(State& state) {
-    //if (records_list[HIGH_SCORE_PLAYERS_NUMBER - 1].score < state.score)
-    //    writeNewRecord(state);
-}
-*/
 /*
 void HighScore::writeNewRecord(State& state) {
 
@@ -129,8 +121,8 @@ void HighScore::load() {
 
     if (!root) {    // if no file exist, creating new table
         for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
-            strcpy(records_list[i].name, "EMPTY");
-            records_list[i].score = 0;
+            strcpy(records[i].name, "EMPTY");
+            records[i].score = 0;
         }
     }
     else {
@@ -142,10 +134,10 @@ void HighScore::load() {
             json_object* player = json_object_array_get_idx(root, i);
 
             json_object* player_name = json_object_object_get(player, "Name");
-            strcpy(records_list[i].name, json_object_get_string(player_name));
+            strcpy(records[i].name, json_object_get_string(player_name));
 
             json_object* player_score = json_object_object_get(player, "Score");
-            records_list[i].score = json_object_get_int(player_score);
+            records[i].score = json_object_get_int(player_score);
         }
     }
 
@@ -159,8 +151,8 @@ void HighScore::save() {
         root = json_object_new_array_ext(HIGH_SCORE_PLAYERS_NUMBER);
         for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
             json_object* player = json_object_new_object();
-            json_object_object_add(player, "Name", json_object_new_string(records_list[i].name));
-            json_object_object_add(player, "Score", json_object_new_int(records_list[i].score));
+            json_object_object_add(player, "Name", json_object_new_string(records[i].name));
+            json_object_object_add(player, "Score", json_object_new_int(records[i].score));
             json_object_array_add(root, player);
         }
     }
@@ -173,10 +165,10 @@ void HighScore::save() {
             json_object* player = json_object_array_get_idx(root, i);
 
             json_object* player_name = json_object_object_get(player, "Name");
-            json_object_set_string(player_name, records_list[i].name);
+            json_object_set_string(player_name, records[i].name);
 
             json_object* player_score = json_object_object_get(player, "Score");
-            json_object_set_int(player_score, records_list[i].score);
+            json_object_set_int(player_score, records[i].score);
 
         }
     }

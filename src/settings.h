@@ -2,6 +2,7 @@
 #define __SETTINGS_H__
 
 #include "tetromino.h"
+#include "high_score.h"
 
 static const unsigned int FRAME_RATE = 60;
 
@@ -25,13 +26,12 @@ struct State {
     // game state
     unsigned int score = 0;
     unsigned int level = 0;
-    int cursor_position = 0;
+    unsigned char cursor_position = 0;
+
     int delay = 0;
-    //unsigned int backup_color = 1;
 
     bool quit_game = false;
     bool game_ended = false;
-    //bool should_be_placed = false;
     bool rerender = true;
     bool paused = false;
     bool soft_drop = false;
@@ -45,6 +45,8 @@ struct State {
     Cell grid[GAME_FIELD_WIDTH][GAME_FIELD_HEIGHT];
 
     Tetromino tetrominoes[MAX_NUM_OF_TETROMINOES];
+
+    const Record* records;
 
     // settings
     bool shadow_enabled = true;

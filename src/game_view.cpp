@@ -57,9 +57,11 @@ void GameView::updateScreen(State& state) {
         break;
 
     case MenuType::HighScore:
+        drawHighScore(state);
         break;
     
     case MenuType::InGameMenu:
+        drawIngameMenu(state);
         break;
     
     case MenuType::MainMenu:
@@ -71,6 +73,8 @@ void GameView::updateScreen(State& state) {
         break;
     }
 }
+
+
 
 void GameView::redrawBackground() {
     render->clearLayer(game_view);
@@ -156,6 +160,18 @@ void GameView::drawGame(State& state) {
     putTetromino(state.tetrominoes[HOLDED], game_view);
 }
 
+void GameView::drawIngameMenu(State& state) {
+    render->clearLayer(ingame_menu);
+    render->putOnLayer(game_view, RenderObjectType::Layer, game_grid, render->blockToScreen(BlockRect{1, 1, 10, 20}));
+
+    render->putOnLayer(ingame_menu, RenderObjectType::Text, texts[Texts::Resume], render->blockToScreen(Block{3, 1}));
+    render->putOnLayer(ingame_menu, RenderObjectType::Text, texts[Texts::MainMenu], render->blockToScreen(Block{3, 4}));
+    render->putOnLayer(ingame_menu, RenderObjectType::Custom, 1, render->blockToScreen(Block{1, 1 + state.cursor_position * 4}));
+    render->putOnLayer(game_view, RenderObjectType::Layer, ingame_menu, render->blockToScreen(BlockRect{5, 5, 15, 15}));
+
+    render->renderLayer(game_view);
+}
+
 void GameView::drawMainMenu(State& state) {
     render->clearLayer(game_view);
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::NewGame], render->blockToScreen(Block{7, 4}));
@@ -199,3 +215,25 @@ void GameView::drawSettings(State& state) {
     render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 6 + state.cursor_position * 2}));
     render->renderLayer(game_view);
 }
+
+void GameView::drawHighScore(State& state) {
+    render->clearLayer(game_view);
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::HighScore], render->blockToScreen(Block{7, 2}));
+    
+    for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
+        if (records[i] == -1) {
+            records[i] = render->createText(FontType::Normal, state.records[i].name, Color::Blue);
+            render->putOnLayer(game_view, RenderObjectType::Text, records[i], render->blockToScreen(Block{7, 4 + i * 2}));
+        }
+        else {
+            render->putOnLayer(game_view, RenderObjectType::Text, records[i], render->blockToScreen(Block{7, 4 + i * 2}));
+        }
+    }
+    render->renderLayer(game_view);
+}
+
+/*
+Screen GameView::getCursorPosition(Screen init_pos, int step_size, unsigned int items_in_menu, unsigned int position) {
+    return Screen{0, 0};
+}
+*/

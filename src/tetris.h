@@ -24,6 +24,7 @@ private:
 
     GameView* game;
     GameLogic* game_logic;
+    HighScore* high_score;
 
     unsigned int move_delay_per_level[30] = {
                                         48, 43, 38, 33, 28, 23, 18, 13, 8, 6,

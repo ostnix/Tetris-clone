@@ -8,7 +8,6 @@
 #include <json-c/json.h>
 #endif
 
-#include "settings.h"
 #include "render.h"
 
 struct Record {
@@ -18,18 +17,18 @@ struct Record {
 
 class HighScore {
 public:
-    HighScore(Render* _render);
+    HighScore();
     ~HighScore();
 
-    bool checkForNewRecord(State& state);
+    void writeNewRecord(const char* name, unsigned int score);
+    bool checkForNewRecord(unsigned int score);
+    const Record* getRecords();
     
-
 private:
     void load();
     void save();
 
-    Record records_list[HIGH_SCORE_PLAYERS_NUMBER];
-    Render* render;
+    Record records[HIGH_SCORE_PLAYERS_NUMBER];
 };
 
 

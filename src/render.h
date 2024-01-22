@@ -16,10 +16,8 @@
 
 #include "tetromino.h"
 
-//typedef int LabelId;
 typedef int BlockId;
 typedef int TextId;
-typedef int BoxId;
 typedef int LayerId;
 typedef int ObjectId;
 
@@ -52,7 +50,7 @@ static const unsigned int BORDER_SIZE = 60;
 static const unsigned int BLOCK_SIZE = 60;
 static const unsigned int MAX_COLORS = 10;
 static const unsigned int MAX_LAYERS = 10;
-static const unsigned int MAX_TEXTS = 20;
+static const unsigned int MAX_TEXTS = 30;
 //static const unsigned int BLOCKED_COLOR = 8;
 
 void concat_strings(char* result, const char* str1, const char* str2);
@@ -70,6 +68,8 @@ public:
 
     Screen blockToScreen(Block coord);
     ScreenRect blockToScreen(BlockRect b);
+    unsigned int getRelativeWidth();
+    unsigned int getRelativeHeight();
     
     void renderLayers();
     void renderLayer(LayerId id);
@@ -88,11 +88,7 @@ public:
     bool updateText(TextId id, FontType font_type, const char* text, Color color);
     bool deleteText(TextId id);
 
-    /*
-    BoxId createBox(Color background_color, ScreenRect size);
-    BoxId createBox(ObjectId id, RenderObjectType background_object_type, ScreenRect size);
-    bool deleteBox(BoxId id);
-    */
+    int getCursorId();
 
 private:
     SDL_Color getColor(Color color);
@@ -106,6 +102,8 @@ private:
     int block_height;
     int border_width;
     int border_height;
+
+    int cursor_id = -1;
 
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;

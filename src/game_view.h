@@ -4,6 +4,7 @@
 #include "settings.h"
 #include "tetromino.h"
 #include "render.h"
+#include "high_score.h"
 
 class GameView {
 public:
@@ -11,9 +12,9 @@ public:
     ~GameView();
 
     void draw(State& state);
-
     void updateGrid(State& state);
     void updateScreen(State& state);
+
 
 private:
     void redrawBackground();
@@ -21,8 +22,12 @@ private:
     void createTexts();
     void putTetromino(Tetromino& tetromino, LayerId id);
     void drawGame(State& state);
+    void drawIngameMenu(State& state);
     void drawMainMenu(State& state);
     void drawSettings(State& state);
+    void drawHighScore(State& state);
+    
+    //Screen getCursorPosition(Screen init_pos, int step_size, unsigned int items_in_menu, unsigned int position);
 
 
     enum Texts {Next = 0, Holded = 1, Pause = 2, Score = 3, Level = 4, ScoreVal = 5, 
@@ -34,6 +39,7 @@ private:
     LayerId ingame_menu = -1;
     LayerId main_menu = -1;
 
+    TextId records[HIGH_SCORE_PLAYERS_NUMBER] = {-1};
     TextId texts[MAX_TEXTS] = {-1};
 
     Render* render;

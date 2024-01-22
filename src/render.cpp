@@ -53,6 +53,14 @@ void Render::renderLayers() {
     SDL_RenderPresent(renderer);
 }
 
+unsigned int Render::getRelativeWidth() {
+    return block_width;
+}
+
+unsigned int Render::getRelativeHeight() {
+    return block_height;
+}
+
 void Render::renderLayer(LayerId id) {
     if (id >= num_of_layers)
         return;
@@ -381,7 +389,8 @@ bool Render::loadTextures(const char* path_to_textures) {
     block_colors[9] = IMG_LoadTexture(renderer, "./textures/default/borders.png");
 
     custom_textures[0] = IMG_LoadTexture(renderer, "./textures/default/background.png");
-    custom_textures[1] = IMG_LoadTexture(renderer, "./textures/default/cursor.png");
+    if (custom_textures[1] = IMG_LoadTexture(renderer, "./textures/default/cursor.png"))\
+        cursor_id = 1;
     custom_textures[2] = IMG_LoadTexture(renderer, "./textures/default/grid.png");
 
     for (int i = 1; i < MAX_COLORS; i++) {
@@ -412,3 +421,6 @@ bool Render::loadFonts() {
     return true;
 }
 
+int Render::getCursorId() {
+    return cursor_id;
+}

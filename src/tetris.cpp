@@ -3,6 +3,9 @@
 Tetris::Tetris(int width, int height, unsigned int start_level) {
     game = new GameView(width, height);
     game_logic = new GameLogic(state);
+    high_score = new HighScore();
+    state.records = high_score->getRecords();
+
     state.context = MenuType::MainMenu;
 
     if (start_level <= 29) {
@@ -16,6 +19,7 @@ Tetris::Tetris(int width, int height, unsigned int start_level) {
 Tetris::~Tetris() {
     delete game_logic;
     delete game;
+    delete high_score;
 }
 
 void Tetris::start() {
@@ -89,6 +93,8 @@ void Tetris::handlePlayerAction() {
                 break;
 
             case PlayerAction::ESC:
+                state.context = MenuType::InGameMenu;
+                game->updateScreen(state);
                 break;
 
             case PlayerAction::OtherKey:
@@ -98,27 +104,33 @@ void Tetris::handlePlayerAction() {
             break;
 
         case MenuType::HighScore:
+            state.context = MenuType::MainMenu;
+            game->updateScreen(state);
             break;
 
         case MenuType::InGameMenu:
             switch (last_action) {
             case PlayerAction::Up:
-                state.cursor_position = (state.cursor_position - 1) % 3;
+                state.cursor_position = (state.cursor_position + 1) % 2;
+                game->updateScreen(state);
                 break;
 
             case PlayerAction::Down:
-                state.cursor_position = (state.cursor_position + 1) % 3;
+                state.cursor_position = (state.cursor_position + 1) % 2;
+                game->updateScreen(state);
                 break;
 
             case PlayerAction::Enter:
                 switch (state.cursor_position) {
                 case 0:
+                    state.context = MenuType::Game;
+                    game->updateScreen(state);
                     break;
 
                 case 1:
-                    break;
-
-                case 2:
+                    state.context = MenuType::MainMenu;
+                    state.level = 0;
+                    game->updateScreen(state);
                     break;
                 }
                 break;
@@ -128,7 +140,7 @@ void Tetris::handlePlayerAction() {
         case MenuType::MainMenu:
             switch (last_action) {
             case PlayerAction::Up:
-                state.cursor_position = (state.cursor_position - 1) % 4;
+                state.cursor_position = (state.cursor_position + 3) % 4;
                 game->updateScreen(state);
                 break;
 
@@ -140,10 +152,14 @@ void Tetris::handlePlayerAction() {
             case PlayerAction::Enter:
                 switch (state.cursor_position) {
                 case 0:
+                    //state.level = 0;
+                    state.score = 0;
                     state.delay = move_delay_per_level[state.level];
                     state.context = MenuType::Game;
-                    game->updateScreen(state);
                     game_logic->start();
+                    game->updateScreen(state);
+                    game->updateGrid(state);
+                    game->draw(state);
                     break;
 
                 case 1:
@@ -153,7 +169,9 @@ void Tetris::handlePlayerAction() {
                     break;
 
                 case 2:
-
+                    state.cursor_position = 0;
+                    state.context = MenuType::HighScore;
+                    game->updateScreen(state);
                     break;
 
                 case 3:
@@ -168,7 +186,7 @@ void Tetris::handlePlayerAction() {
         case MenuType::Settings:
             switch (last_action) {
             case PlayerAction::Up:
-                state.cursor_position = (state.cursor_position - 1) % 4;
+                state.cursor_position = (state.cursor_position + 3) % 4;
                 game->updateScreen(state);
                 break;
 
