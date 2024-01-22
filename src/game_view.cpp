@@ -1,6 +1,15 @@
 #include "game_view.h"
 
 GameView::GameView(int width, int height) {
+    
+    for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
+        records[i] = -1;
+    }
+
+    for (int i = 0; i < MAX_TEXTS; i++) {
+        texts[i] = -1;
+    }
+
     render = new Render(width, height);
 
     game_view = render->createLayer({0, 0, width, height});

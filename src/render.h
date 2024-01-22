@@ -108,9 +108,9 @@ private:
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
 
-    SDL_Texture* block_colors[MAX_COLORS] = {NULL};
-    SDL_Texture* custom_textures[3] = {NULL};
-    SDL_Texture* texts[MAX_TEXTS] = {NULL};
+    SDL_Texture* block_colors[MAX_COLORS] = {};
+    SDL_Texture* custom_textures[3] = {};
+    SDL_Texture* texts[MAX_TEXTS] = {};
     
     unsigned int num_of_texts = 0;
     

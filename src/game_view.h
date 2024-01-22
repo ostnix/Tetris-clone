@@ -39,8 +39,8 @@ private:
     LayerId ingame_menu = -1;
     LayerId main_menu = -1;
 
-    TextId records[HIGH_SCORE_PLAYERS_NUMBER] = {-1};
-    TextId texts[MAX_TEXTS] = {-1};
+    TextId records[HIGH_SCORE_PLAYERS_NUMBER];
+    TextId texts[MAX_TEXTS];
 
     Render* render;
 };
