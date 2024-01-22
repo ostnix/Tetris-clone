@@ -47,6 +47,8 @@ struct State {
 
     Tetromino tetrominoes[MAX_NUM_OF_TETROMINOES];
 
+    char player_name[MAX_TEXT_CHARS];
+
     const Record* records;
 
     // settings

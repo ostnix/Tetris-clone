@@ -1,6 +1,6 @@
 #include "input.h"
 
-PlayerAction Input::getEvent() {
+PlayerAction Input::getEvent(char* text_input) {
     SDL_Event event;
 
     if (!SDL_PollEvent(&event)) {
@@ -10,6 +10,11 @@ PlayerAction Input::getEvent() {
     switch (event.type) {
     case SDL_QUIT:
         return PlayerAction::Exit;
+        break;
+    
+    case SDL_TEXTINPUT:
+        strcpy(text_input, event.text.text);
+        return PlayerAction::OtherKey;
         break;
 
     case SDL_KEYDOWN:

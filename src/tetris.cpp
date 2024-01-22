@@ -38,7 +38,10 @@ void Tetris::gameLoop() {
 
 void Tetris::handlePlayerAction() {
     PlayerAction last_action = PlayerAction::None;
-    while ((last_action = input.getEvent()) != PlayerAction::None) {
+
+    char text_input[MAX_TEXT_CHARS] = {'\0'};
+
+    while ((last_action = input.getEvent(text_input)) != PlayerAction::None) {
 
         if (last_action == PlayerAction::Exit) {
             state.quit_game = true;
@@ -47,6 +50,22 @@ void Tetris::handlePlayerAction() {
 
         switch (state.context) {
         case MenuType::Game:
+            if (state.new_high_score) {
+                if (last_action == PlayerAction::Enter) {
+                    high_score->writeNewRecord(state.player_name, state.score);
+                    input.keyboardTextInput(false);
+                    state.context = MenuType::HighScore;
+                    game->updateScreen(state);
+                    return;
+                }
+
+                if (text_input[0] != '\x1' && (strlen(state.player_name) + strlen(text_input) < MAX_TEXT_CHARS)) {
+                    strcat(state.player_name, text_input);
+                    game->updateScreen(state);
+                }
+                return;
+            }
+
             if (state.paused) {
                 state.paused = false;
                 game->updateScreen(state);
@@ -129,7 +148,6 @@ void Tetris::handlePlayerAction() {
 
                 case 1:
                     state.context = MenuType::MainMenu;
-                    state.level = 0;
                     game->updateScreen(state);
                     break;
                 }
@@ -152,9 +170,11 @@ void Tetris::handlePlayerAction() {
             case PlayerAction::Enter:
                 switch (state.cursor_position) {
                 case 0:
-                    //state.level = 0;
+                    state.player_name[0] = '\0';
+                    state.level = 0;
                     state.score = 0;
                     state.delay = move_delay_per_level[state.level];
+                    state.game_ended = false;
                     state.context = MenuType::Game;
                     game_logic->start();
                     game->updateScreen(state);
@@ -226,7 +246,7 @@ void Tetris::handlePlayerAction() {
 }
 
 void Tetris::gameStep() {
-    if (state.paused)
+    if (state.paused || state.new_high_score)
         return;
 
     if (state.context == MenuType::Game) {
@@ -239,7 +259,7 @@ void Tetris::gameStep() {
                 state.instant_drop = false;
 
                 if (!game_logic->newTetromino()) {
-                    state.quit_game = true;
+                    state.game_ended = true;
                 }
                 else {
                     game->updateScreen(state);
@@ -250,7 +270,7 @@ void Tetris::gameStep() {
                     state.soft_drop = false;
                 }
                 else if (!game_logic->newTetromino()) {
-                    state.quit_game = true;
+                    state.game_ended = true;
                 }
                 else {
                     game->updateScreen(state);
@@ -261,6 +281,15 @@ void Tetris::gameStep() {
             game->updateGrid(state);
             state.delay = move_delay_per_level[state.level];
         }
+
+        if (state.game_ended) {
+            if (high_score->checkForNewRecord(state.score)) {
+                state.new_high_score = true;
+                input.keyboardTextInput(true);
+                game->updateScreen(state);
+            }
+        }
+
         game->draw(state);
         state.delay--;
     }

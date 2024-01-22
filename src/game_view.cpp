@@ -60,6 +60,18 @@ void GameView::updateGrid(State& state) {
 }
 
 void GameView::updateScreen(State& state) {
+    if (state.new_high_score) {
+        if (player_name == -1) {
+            render->createText(FontType::Normal, state.player_name, Color::Blue);
+        }
+        else {
+            render->updateText(player_name, FontType::Normal, state.player_name, Color::Blue);
+        }
+        render->putOnLayer(game_view, RenderObjectType::Text, Texts::HighScore, render->blockToScreen(Block{5, 5}));
+        render->putOnLayer(game_view, RenderObjectType::Text, player_name, render->blockToScreen(Block{10, 5}));
+        return;
+    }
+
     switch (state.context) {
     case MenuType::Game:
         drawGame(state);
@@ -237,6 +249,7 @@ void GameView::drawHighScore(State& state) {
             records_text[i] = render->createText(FontType::Normal, record, Color::Blue);
         }
         else if (state.new_high_score) {
+            state.new_high_score = false;
             char record[MAX_TEXT_CHARS] = {'\0'};
             concat_strings(record, state.records[i].name, ": ");
             add_num(record, state.records[i].score);
@@ -245,5 +258,6 @@ void GameView::drawHighScore(State& state) {
 
         render->putOnLayer(game_view, RenderObjectType::Text, records_text[i], render->blockToScreen(Block{7, 5 + i * 2}));
     }
+
     render->renderLayer(game_view);
 }

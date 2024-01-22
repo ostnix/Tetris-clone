@@ -14,7 +14,7 @@ public:
     Input() {}
     ~Input() {}
 
-    PlayerAction getEvent();
+    PlayerAction getEvent(char* text_input = NULL);
     void keyboardTextInput(bool active = true);
 
 private:

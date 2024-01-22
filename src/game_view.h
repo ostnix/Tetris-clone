@@ -36,6 +36,7 @@ private:
     LayerId ingame_menu = -1;
     LayerId main_menu = -1;
 
+    TextId player_name = -1;
     TextId records_text[HIGH_SCORE_PLAYERS_NUMBER] = {};
     TextId texts[MAX_TEXTS] = {};
 
