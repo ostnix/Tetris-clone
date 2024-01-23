@@ -98,6 +98,7 @@ public:
 private:
     SDL_Color getColor(Color color);
 
+    void deleteTextures();
     bool loadTextures(const char* path_to_textures);
     bool loadFonts();
 

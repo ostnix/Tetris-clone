@@ -158,7 +158,7 @@ void Tetris::handlePlayerAction() {
         case MenuType::MainMenu:
             switch (last_action) {
             case PlayerAction::Up:
-                state.cursor_position = (state.cursor_position + 3) % 5;
+                state.cursor_position = (state.cursor_position + 4) % 5;
                 game->updateScreen(state);
                 break;
 
@@ -234,7 +234,7 @@ void Tetris::handlePlayerAction() {
                     break;
 
                 case 2:
-                    state.show_next_piece_enabled != state.show_next_piece_enabled;
+                    state.show_next_piece_enabled = !state.show_next_piece_enabled;
                     game->updateScreen(state);
                     break;
 
@@ -253,11 +253,13 @@ void Tetris::handlePlayerAction() {
 
             switch (last_action) {
             case PlayerAction::Up:
-                state.cursor_position = (state.cursor_position + (number_of_packs)) % number_of_packs + 1;
+                state.cursor_position = (state.cursor_position + (number_of_packs)) % (number_of_packs + 1);
+                game->updateScreen(state);
                 break;
 
             case PlayerAction::Down:
-                state.cursor_position = (state.cursor_position + 1) % number_of_packs + 1;
+                state.cursor_position = (state.cursor_position + 1) % (number_of_packs + 1);
+                game->updateScreen(state);
                 break;
 
             case PlayerAction::Enter:

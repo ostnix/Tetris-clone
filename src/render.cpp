@@ -1,7 +1,7 @@
 #include "render.h"
 
 void concat_strings(char* result, const char* str1, const char* str2) {
-    strcat(result, str1);
+    strcpy(result, str1);
     strcat(result, str2);
 }
 
@@ -357,8 +357,19 @@ int Render::getCursorId() {
     return cursor_id;
 }
 
-bool tryLoadTextures(const char* pack_name) {
-    return false;
+bool Render::tryLoadTextures(const char* pack_name) {
+    deleteTextures();
+
+    char path[100] = "./textures/";
+    strcat(path, pack_name);
+    
+    if (!loadTextures(path)) {
+        deleteTextures();
+        loadTextures("./textures/default");
+        return false;
+    }
+
+    return true;
 }
 
 SDL_Color Render::getColor(Color color) {
@@ -394,21 +405,46 @@ SDL_Color Render::getColor(Color color) {
     return sdl_color;
 }
 
-bool Render::loadTextures(const char* path_to_textures) {
-    block_colors[1] = IMG_LoadTexture(renderer, "./textures/default/cyan.png");
-    block_colors[2] = IMG_LoadTexture(renderer, "./textures/default/yellow.png");
-    block_colors[3] = IMG_LoadTexture(renderer, "./textures/default/violet.png");
-    block_colors[4] = IMG_LoadTexture(renderer, "./textures/default/green.png");
-    block_colors[5] = IMG_LoadTexture(renderer, "./textures/default/red.png");
-    block_colors[6] = IMG_LoadTexture(renderer, "./textures/default/blue.png");
-    block_colors[7] = IMG_LoadTexture(renderer, "./textures/default/orange.png");
-    block_colors[8] = IMG_LoadTexture(renderer, "./textures/default/blocked.png");
-    block_colors[9] = IMG_LoadTexture(renderer, "./textures/default/borders.png");
+void Render::deleteTextures() {
+    for (int i = 0; i < MAX_COLORS; i++) {
+        SDL_DestroyTexture(block_colors[i]);
+    }
 
-    custom_textures[0] = IMG_LoadTexture(renderer, "./textures/default/background.png");
-    if (custom_textures[1] = IMG_LoadTexture(renderer, "./textures/default/cursor.png"))\
+    SDL_DestroyTexture(custom_textures[0]);
+    SDL_DestroyTexture(custom_textures[1]);
+    SDL_DestroyTexture(custom_textures[2]);
+}
+
+bool Render::loadTextures(const char* path_to_textures) {
+    char full_path[100];
+    concat_strings(full_path, path_to_textures, "/cyan.png");
+    block_colors[1] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/yellow.png");
+    block_colors[2] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/violet.png");
+    block_colors[3] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/green.png");
+    block_colors[4] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/red.png");
+    block_colors[5] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/blue.png");
+    block_colors[6] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/orange.png");
+    block_colors[7] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/blocked.png");
+    block_colors[8] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/borders.png");
+    block_colors[9] = IMG_LoadTexture(renderer, full_path);
+
+    concat_strings(full_path, path_to_textures, "/background.png");
+    custom_textures[0] = IMG_LoadTexture(renderer, full_path);
+
+    concat_strings(full_path, path_to_textures, "/cursor.png");
+    if (custom_textures[1] = IMG_LoadTexture(renderer, full_path))
         cursor_id = 1;
-    custom_textures[2] = IMG_LoadTexture(renderer, "./textures/default/grid.png");
+
+    concat_strings(full_path, path_to_textures, "/grid.png");
+    custom_textures[2] = IMG_LoadTexture(renderer, full_path);
 
     for (int i = 1; i < MAX_COLORS; i++) {
         SDL_SetTextureBlendMode(block_colors[i], SDL_BLENDMODE_BLEND);

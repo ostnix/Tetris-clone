@@ -101,7 +101,8 @@ void GameView::updateScreen(State& state) {
 }
 
 bool GameView::tryLoadTexturePack(unsigned int pack_index) {
-    return false;
+    assert(render->tryLoadTextures(pack_folders_names[pack_index]));
+    return true;
 }
 
 unsigned int GameView::getNumberOfTexturePacks() {
@@ -287,6 +288,7 @@ void GameView::drawTexturePacksList(State& state) {
         render->putOnLayer(game_view, RenderObjectType::Text, texture_pack_folders[i], render->blockToScreen(Block{5, 2 + i * 2}));
     }
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Back], render->blockToScreen(Block{5, 2 + (int)number_of_texture_packs * 2}));
+    render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{1, 2 + state.cursor_position * 2}));
     render->renderLayer(game_view);
 }
 
