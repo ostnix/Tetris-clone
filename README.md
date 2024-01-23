@@ -1,2 +1,2 @@
 # Tetris-clone
-My tetris clone maked with sdl.
+My Tetris clone created using SDL.

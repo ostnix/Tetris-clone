@@ -1,13 +1,27 @@
 #include "render.h"
 
-Render::Render(int width, int height) : window_width(width), window_height(height) {
+void concat_strings(char* result, const char* str1, const char* str2) {
+    strcpy(result, str1);
+    strcat(result, str2);
+}
+
+void add_to_string(char* result, const char* str) {
+    strcat(result, str);
+}
+
+void add_num(char* result, const int number) {
+    char text[MAX_TEXT_CHARS + sizeof(char)];
+    sprintf(text, "%d", number);
+    strcat(result, text);
+}
+
+Render::Render(int width, int height, const char* path_to_textures) : window_width(width), window_height(height) {
     TTF_Init();
 
     assert(SDL_CreateWindowAndRenderer(window_width, window_height, 0, &window, &renderer) == 0);
 
-    assert(loadTextures());
+    assert(loadTextures(path_to_textures));
     assert(loadFonts());
-    prerenderText();
 
     border_width = ((float)window_width/(12*BORDER_SIZE*2)) * BORDER_SIZE;
     border_height = ((float)window_height/(22*BORDER_SIZE)) * BORDER_SIZE ;
@@ -27,306 +41,449 @@ Render::~Render() {
     SDL_Quit();
 }
 
-void Render::renderGame(const unsigned int grid[10][20], 
-                        const Tetromino& tetromino, 
-                        const Tetromino& next_tetromino,
-                        const Tetromino& holded_tetromino,
-                        const Tetromino& shadow_tetromino) {
+Screen Render::blockToScreen(Block b) {
+    return {b.col * block_width, b.row * block_height};
+}
+
+ScreenRect Render::blockToScreen(BlockRect b) {
+    return {b.col * block_width, b.row * block_height, b.end_col * block_width, b.end_row * block_height};
+}
+
+void Render::renderLayers() {
+    if (SDL_GetRenderTarget(renderer)) {
+        SDL_SetRenderTarget(renderer, NULL);
+    }
+    
+    SDL_RenderClear(renderer);
+    for (int i = 0; i < num_of_layers; i++) {
+        if (layers[i]->is_visible)
+            SDL_RenderCopy(renderer, layers[i]->texture, NULL, &layers[i]->rect);
+    }
+    SDL_RenderPresent(renderer);
+}
+
+unsigned int Render::getRelativeWidth() {
+    return block_width;
+}
+
+unsigned int Render::getRelativeHeight() {
+    return block_height;
+}
+
+void Render::renderLayer(LayerId id) {
+    if (id >= num_of_layers)
+        return;
+    
+    if (SDL_GetRenderTarget(renderer)) {
+        SDL_SetRenderTarget(renderer, NULL);
+    }
 
     SDL_RenderClear(renderer);
-    renderBackground();
-    renderBorders();
-    renderText();
-    renderGrid(grid);
-    renderTetromino(shadow_tetromino, true, true);
-    renderTetromino(tetromino, true, false); 
-    renderTetromino(next_tetromino, false, false);
-    renderTetromino(holded_tetromino, false, false);
+    SDL_RenderCopy(renderer, layers[id]->texture, NULL, &layers[id]->rect);
     SDL_RenderPresent(renderer);
 }
 
-void Render::showPause() {
-    SDL_Point size = labels[Labels::Pause]->getSufaceSize();
+LayerId Render::createLayer(ScreenRect rect) {
+    if (num_of_layers >= MAX_LAYERS)
+        return -1;
 
-    labels[Labels::Pause]->render(renderer,{window_width/2 - size.x/2, 
-                                            window_height/2 - size.y/2});
+    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, rect.w, rect.h);
+    if (!texture)
+        return -1;
 
-    SDL_RenderPresent(renderer);
+    Layer* layer = new Layer();
+    layer->texture = texture;
+    layer->rect = SDL_Rect{rect.x, rect.y, rect.w, rect.h};
+    layers[num_of_layers] = layer;
+    num_of_layers++;
+
+    return num_of_layers - 1;
 }
 
-void Render::prerenderScoreAndLevel(int score, int level) {
-    char c_score[MAX_DIGITS + sizeof(char)];
-    char c_level[MAX_DIGITS + sizeof(char)];
+bool Render::setLayerVisibility(LayerId id, bool is_visible) {
+    if (id < 0 || id >= num_of_layers)
+        return false;
+
+    layers[id]->is_visible = is_visible;
+    return true;
+}
+
+bool Render::clearLayer(LayerId id) {
+    if (id < 0 || id >= num_of_layers)
+        return false;
     
-    sprintf(c_score, "%d", score);
-    sprintf(c_level, "%d", level);
-
-    if (dynamic_labels[DynamicLabels::ScoreValue] != NULL)
-        dynamic_labels[DynamicLabels::ScoreValue]->updateText(renderer, font, c_score, grey);
-    else 
-        dynamic_labels[DynamicLabels::ScoreValue] = new Label(renderer, font, c_score, grey);
-
-    if (dynamic_labels[DynamicLabels::LevelValue] != NULL) 
-        dynamic_labels[DynamicLabels::LevelValue]->updateText(renderer, font, c_level, grey);
-
-    else 
-        dynamic_labels[DynamicLabels::LevelValue] = new Label(renderer, font, c_level, grey);
-
-}
-
-void Render::showHighScore() {
-
-}
-
-void Render::showMenu(MenuType menu, unsigned int cursor_position) {
-    switch (menu) {
-    case MenuType::MainMenu:
-        SDL_RenderClear(renderer);
-        renderBackground();
-        renderMainMenu();
-        renderCursor(cursor_position, menu);
-        SDL_RenderPresent(renderer);
-        break;
-    
-    case MenuType::Settings:
-        SDL_RenderClear(renderer);
-        renderBackground();
-        renderSettings();
-        renderCursor(cursor_position, menu);
-        SDL_RenderPresent(renderer);
-        break;
-    
-    case MenuType::InGameMenu:
-        SDL_RenderClear(renderer);
-        renderBackground();
-        renderInGameMenu();
-        renderCursor(cursor_position, menu);
-        SDL_RenderPresent(renderer);
-        break;
-    }
-}
-
-void Render::showGameEnded() {
-    int x, y;
-    x = 5 * block_width + border_width; y = 10 * block_height + border_height;
-    labels[Labels::GameEnded]->render(renderer, {x, y});  
-    SDL_RenderPresent(renderer);
+    if (SDL_GetRenderTarget(renderer) != layers[id]->texture) {
+        if (SDL_SetRenderTarget(renderer, layers[id]->texture) < 0) {
+            return false;
+        }
     }
 
-bool Render::loadTextures() {
+    SDL_RenderClear(renderer);
+
+    return true;
+}
+
+bool Render::changeLayerPriority(LayerId id, LayerId new_id) {
+    if (id < 0 || id >= num_of_layers || new_id < 0 || new_id >= num_of_layers || id == new_id)
+        return false;
+
+    if (id > new_id) {
+        Layer* layer = layers[id];
+        for (int i = id + 1; i <= new_id; i++) {
+            layers[i - 1] = layers[i];
+        }
+        layers[new_id] = layer;
+    }
+    else {
+        Layer* layer = layers[id];
+        for (int i = id - 1; i >= new_id; i--) {
+            layers[i + 1] = layers[i];
+        }
+        layers[new_id] = layer;
+    }
+
+    return true;
+}
+
+bool Render::putOnLayer(LayerId layer_id, RenderObjectType object_type, ObjectId id, Screen p, unsigned char transparency) {
+    ScreenRect rect = {p.x, p.y, 0, 0};
+
+    switch (object_type) {
+    case RenderObjectType::Block:
+        rect = {p.x, p.y, block_width, block_height};
+        break;
+
+    case RenderObjectType::Text:
+        rect.x = p.x; rect.y = p.y;
+        SDL_QueryTexture(texts[id], NULL, NULL, &rect.w, &rect.h);
+        break;
+
+    case RenderObjectType::Custom:
+        rect.x = p.x; rect.y = p.y;
+        SDL_QueryTexture(custom_textures[id], NULL, NULL, &rect.w, &rect.h);
+        break;
     
-    block_colors[1] = IMG_LoadTexture(renderer, "./textures/cyan.png");     
-    block_colors[2] = IMG_LoadTexture(renderer, "./textures/yellow.png"); 
-    block_colors[3] = IMG_LoadTexture(renderer, "./textures/violet.png");
-    block_colors[4] = IMG_LoadTexture(renderer, "./textures/green.png");     
-    block_colors[5] = IMG_LoadTexture(renderer, "./textures/red.png");
-    block_colors[6] = IMG_LoadTexture(renderer, "./textures/blue.png");
-    block_colors[7] = IMG_LoadTexture(renderer, "./textures/orange.png");
-    block_colors[8] = IMG_LoadTexture(renderer, "./textures/blocked.png");
+    case RenderObjectType::Layer:
+        rect.x = p.x; rect.y = p.y;
+        SDL_QueryTexture(layers[id]->texture, NULL, NULL, &rect.w, &rect.h);
+        break;
+    }
 
-    background_texture = IMG_LoadTexture(renderer, "./textures/background.png");
-    borders_texture = IMG_LoadTexture(renderer, "./textures/borders.png");
-    cursor = IMG_LoadTexture(renderer, "./textures/cursor.png");
 
-    for (int i = 1; i < 9; i++) {
+    return putOnLayer(layer_id, object_type, id, rect, transparency);
+}
+
+bool Render::putOnLayer(LayerId layer_id, RenderObjectType object_type, ObjectId id, ScreenRect rect, unsigned char transparency) {
+    if (layer_id < 0 || layer_id >= num_of_layers)
+        return false;
+
+    if (SDL_GetRenderTarget(renderer) != layers[layer_id]->texture) {
+        if (SDL_SetRenderTarget(renderer, layers[layer_id]->texture) < 0) {
+            return false;
+        }
+    }
+
+    SDL_Rect sdl_rect;
+
+    switch (object_type) {
+    case RenderObjectType::Block:
+        if (id < 1 || id >= MAX_COLORS)
+            return false;
+        
+        sdl_rect = {rect.x, rect.y, rect.w, rect.h};
+        if (transparency < 255)
+            SDL_SetTextureAlphaMod(block_colors[id], transparency);
+
+        SDL_RenderCopy(renderer, block_colors[id], NULL, &sdl_rect);
+        if (transparency < 255)
+            SDL_SetTextureAlphaMod(block_colors[id], 255);
+        break;
+
+    case RenderObjectType::Text:
+        if (id < 0 || id >= num_of_texts)
+            return false;
+
+        sdl_rect = {rect.x, rect.y, rect.w, rect.h};
+        if (transparency < 255) 
+            SDL_SetTextureAlphaMod(texts[id], transparency);
+
+        SDL_RenderCopy(renderer, texts[id], NULL, &sdl_rect);
+        if (transparency < 255) 
+            SDL_SetTextureAlphaMod(texts[id], 255);
+
+        break;
+
+    case RenderObjectType::Custom:
+        sdl_rect = {rect.x, rect.y, rect.w, rect.h};
+        if (transparency < 255)
+            SDL_SetTextureAlphaMod(custom_textures[id], transparency);
+
+        SDL_RenderCopy(renderer, custom_textures[id], NULL, &sdl_rect);
+        if (transparency < 255)
+            SDL_SetTextureAlphaMod(custom_textures[id], 255);
+        break;
+
+    case RenderObjectType::Layer:
+        if (id < 0 || id > num_of_layers)
+            return false;
+
+        sdl_rect = {rect.x, rect.y, rect.w, rect.h};
+        if (transparency < 255)
+            SDL_SetTextureAlphaMod(layers[id]->texture, transparency);
+
+        SDL_RenderCopy(renderer, layers[id]->texture, NULL, &sdl_rect);
+        if (transparency < 255)
+            SDL_SetTextureAlphaMod(layers[id]->texture, 255);
+
+        break;
+    }
+
+    return true;
+}
+
+bool Render::deleteLayer(LayerId id) {
+    if (id < 0 || id >= num_of_layers)
+        return false;
+
+    if (!layers[id])
+        return false;
+
+    SDL_DestroyTexture(layers[id]->texture);
+    delete layers[id];
+
+    for (int i = id + 1; i < num_of_layers; i++) {
+        layers[i - 1] = layers[i];
+    }
+
+    num_of_layers--;
+    layers[num_of_layers] = NULL;
+    return true;
+}
+
+TextId Render::createText(FontType font_type, int number, Color color) {
+    char text[MAX_TEXT_CHARS + sizeof(char)];
+    sprintf(text, "%d", number);
+    return createText(font_type, text, color);
+}
+
+TextId Render::createText(FontType font_type, const char* text, Color color) {
+    if (strlen(text) > MAX_TEXT_CHARS)
+        return -1;
+
+    if (num_of_texts >= MAX_TEXTS)
+        return -1;
+
+    SDL_Texture* texture = NULL;
+    SDL_Surface* surface = NULL;
+
+    switch (font_type) {
+    case FontType::Normal:
+        surface = TTF_RenderUTF8_Solid(font, text, getColor(color));
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+        if (!texture)
+            return -1;
+        break;
+
+    case FontType::Big:
+        surface = TTF_RenderUTF8_Solid(font_big, text, getColor(color));
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+        if (!texture)
+            return -1;
+        break;
+    }
+
+    texts[num_of_texts] = texture;
+    num_of_texts++;
+    return (num_of_texts - 1);
+}
+
+bool Render::updateText(TextId id, FontType font_type, unsigned int number, Color color) {
+    char text[MAX_TEXT_CHARS + sizeof(char)];
+    sprintf(text, "%d", number);
+    return updateText(id, font_type, text, color);
+}
+
+bool Render::updateText(TextId id, FontType font_type, const char* text, Color color) {
+    if (id < 0 || id >= num_of_texts || !texts[id])
+        return false;
+
+    SDL_Texture* texture = NULL;
+    SDL_Surface* surface = NULL;
+
+    switch (font_type) {
+    case FontType::Normal:
+        if (text[0] != '\0')
+            surface = TTF_RenderUTF8_Solid(font, text, getColor(color)); 
+        else 
+            surface = TTF_RenderUTF8_Solid(font, " ", getColor(color));
+
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+        if (!texture)
+            return false;
+        break;
+
+    case FontType::Big:
+        if (text[0] != '\0')
+            surface = TTF_RenderUTF8_Solid(font, text, getColor(color));
+        else
+            surface = TTF_RenderUTF8_Solid(font, " ", getColor(color));
+
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+        if (!texture)
+            return false;
+        break;
+    }
+
+    SDL_DestroyTexture(texts[id]);
+    texts[id] = texture;
+
+    return true;
+}
+
+bool Render::deleteText(TextId id) {
+    if (id < 0 || id >= num_of_texts)
+        return false;
+
+    if (!texts[id])
+        return false;
+
+    SDL_DestroyTexture(texts[id]);
+    for (int i = id + 1; i < num_of_texts; i++) {
+        texts[i - 1] = texts[i];
+    }
+
+    num_of_texts--;
+    texts[num_of_texts] = NULL;
+    return true;
+}
+
+int Render::getCursorId() {
+    return cursor_id;
+}
+
+bool Render::tryLoadTextures(const char* pack_name) {
+    deleteTextures();
+
+    char path[100] = "./textures/";
+    strcat(path, pack_name);
+    
+    if (!loadTextures(path)) {
+        deleteTextures();
+        loadTextures("./textures/default");
+        return false;
+    }
+
+    return true;
+}
+
+SDL_Color Render::getColor(Color color) {
+    SDL_Color sdl_color = {250, 250, 250};
+
+    switch (color)
+    {
+    case Color::Grey:
+        sdl_color = {200, 200, 200};
+        break;
+
+    case Color::White:
+        sdl_color = {250, 250, 250};
+        break;
+
+    case Color::Red:
+        sdl_color = {250, 50, 50};
+        break;
+
+    case Color::Green:
+        sdl_color = {50, 250, 50};
+        break;
+
+    case Color::Blue:
+        sdl_color = {50, 50, 250};
+        break;
+
+    default:
+        sdl_color = {250, 250, 250};
+        break;
+    }
+
+    return sdl_color;
+}
+
+void Render::deleteTextures() {
+    for (int i = 0; i < MAX_COLORS; i++) {
+        SDL_DestroyTexture(block_colors[i]);
+    }
+
+    SDL_DestroyTexture(custom_textures[0]);
+    SDL_DestroyTexture(custom_textures[1]);
+    SDL_DestroyTexture(custom_textures[2]);
+    SDL_DestroyTexture(custom_textures[3]);
+}
+
+bool Render::loadTextures(const char* path_to_textures) {
+    char full_path[100];
+    concat_strings(full_path, path_to_textures, "/cyan.png");
+    block_colors[1] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/yellow.png");
+    block_colors[2] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/violet.png");
+    block_colors[3] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/green.png");
+    block_colors[4] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/red.png");
+    block_colors[5] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/blue.png");
+    block_colors[6] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/orange.png");
+    block_colors[7] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/blocked.png");
+    block_colors[8] = IMG_LoadTexture(renderer, full_path);
+    concat_strings(full_path, path_to_textures, "/borders.png");
+    block_colors[9] = IMG_LoadTexture(renderer, full_path);
+
+    concat_strings(full_path, path_to_textures, "/background.png");
+    custom_textures[0] = IMG_LoadTexture(renderer, full_path);
+
+    concat_strings(full_path, path_to_textures, "/cursor.png");
+    if (custom_textures[1] = IMG_LoadTexture(renderer, full_path))
+        cursor_id = 1;
+
+    concat_strings(full_path, path_to_textures, "/grid.png");
+    custom_textures[2] = IMG_LoadTexture(renderer, full_path);
+
+    concat_strings(full_path, path_to_textures, "/menu_background.png");
+    custom_textures[3] = IMG_LoadTexture(renderer, full_path);
+
+    for (int i = 1; i < MAX_COLORS; i++) {
         SDL_SetTextureBlendMode(block_colors[i], SDL_BLENDMODE_BLEND);
     }
 
-    return (block_colors[1] && 
-            block_colors[2] && 
-            block_colors[3] && 
-            block_colors[4] && 
-            block_colors[5] && 
-            block_colors[6] && 
-            block_colors[7] &&
-            block_colors[8] &&
-            background_texture &&
-            borders_texture &&
-            cursor);
+    return (block_colors[1] &&
+        block_colors[2] &&
+        block_colors[3] &&
+        block_colors[4] &&
+        block_colors[5] &&
+        block_colors[6] &&
+        block_colors[7] &&
+        block_colors[8] &&
+        block_colors[9] &&
+        custom_textures[0] &&
+        custom_textures[1] &&
+        custom_textures[2] &&
+        custom_textures[3]);
 }
 
 bool Render::loadFonts() {
     font = TTF_OpenFont("./fonts/VT323-Regular.ttf", 40);
     font_big = TTF_OpenFont("./fonts/VT323-Regular.ttf", 80);
 
-    if (font == NULL || font_big == NULL) 
+    if (font == NULL || font_big == NULL)
         return false;
-    
+
     return true;
 }
-
-void Render::renderMainMenu() {
-    int x, y;
-    x = 5 * block_width + border_width; y = 6 * block_height + border_height;
-    labels[Labels::StartGame]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 8 * block_height + border_height;
-    labels[Labels::Settings]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 10 * block_height + border_height;
-    labels[Labels::HighScore]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 12 * block_height + border_height;    
-    labels[Labels::Exit]->render(renderer, {x, y});
-}
-
-void Render::renderSettings() {
-    int x, y;
-    x = 4 * block_width + border_width; y = 1 * block_height + border_height;
-    labels[Labels::Settings]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 6 * block_height + border_height;
-    labels[Labels::ShadowEnabled]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 8 * block_height + border_height;    
-    labels[Labels::HoldPieceEnabled]->render(renderer, {x, y});
-    
-    x = 5 * block_width + border_width; y = 10 * block_height + border_height;    
-    labels[Labels::ShowNextPieceEnabled]->render(renderer, {x, y});
-    
-    x = 5 * block_width + border_width; y = 12 * block_height + border_height;    
-    labels[Labels::Back]->render(renderer, {x, y});
-}
-
-void Render::renderInGameMenu() {
-    int x, y;
-    x = 5 * block_width + border_width; y = 8 * block_height + border_height;
-    labels[Labels::Resume]->render(renderer, {x, y});
-
-    x = 5 * block_width + border_width; y = 10 * block_height + border_height;
-    labels[Labels::Exit]->render(renderer, {x, y});
-}
-
-void Render::renderCursor(unsigned int position, MenuType menu) {
-    int x, y;
-    SDL_Rect block;
-
-    switch (menu) {
-    case MenuType::MainMenu:
-        x = 2 * block_width + border_width;
-        y = (6 + position * 2) * block_height + border_height;               
-
-        block = {x, y, block_width * 2, block_height * 2};   
-        SDL_RenderCopy(renderer, cursor, NULL, &block);
-        break;
-    
-    case MenuType::Settings:
-        x = 2 * block_width + border_width;
-        y = (6 + position * 2) * block_height + border_height;               
-
-        block = {x, y, block_width, block_height};   
-        SDL_RenderCopy(renderer, cursor, NULL, &block);
-        break;
-
-    case MenuType::InGameMenu:
-        x = 2 * block_width + border_width;
-        y = (8 + position * 2) * block_height + border_height;               
-
-        block = {x, y, block_width * 2, block_height * 2};   
-        SDL_RenderCopy(renderer, cursor, NULL, &block);
-        break;
-    }
-}
-
-void Render::renderBackground() {
-    SDL_Rect background = {0, 0, window_width, window_height};
-    SDL_RenderCopy(renderer, background_texture, NULL, &background);
-}
-
-void Render::renderBorders() {
-    for (int row = 0; row < 22; row++) {
-        for (int col = 0; col < 12; col++) {
-            if (col > 0 && col < 11) {
-                if (row == 0 || row == 21) {
-                    SDL_Rect border_part = {col * border_width, row * border_height, border_width, border_height};
-                    SDL_RenderCopy(renderer, borders_texture, NULL, &border_part);
-                }
-            }
-            else {
-                SDL_Rect border_part = {col * border_width, row * border_height, border_width, border_height};
-                SDL_RenderCopy(renderer, borders_texture, NULL, &border_part);
-            }
-        }
-    }
-}
-
-void Render::prerenderText() {
-    labels[Labels::Next] = new Label(renderer, font, (char*)"Next piece:", grey);
-    labels[Labels::Pause] = new Label(renderer, font_big, (char*)"Pause", white);
-    labels[Labels::Holded] = new Label(renderer, font, (char*)"Holded Piece:", grey);
-    labels[Labels::StartGame] = new Label(renderer, font_big, (char*)"Start game", grey);
-    labels[Labels::Settings] = new Label(renderer, font_big, (char*)"Settings", grey);
-    labels[Labels::HighScore] = new Label(renderer, font_big, (char*)"High score", grey);
-    labels[Labels::Exit] = new Label(renderer, font_big, (char*)"Exit", grey);
-    labels[Labels::GameEnded] = new Label(renderer, font_big, (char*)"GAME ENDED!!!", white);
-    labels[Labels::ShadowEnabled] = new Label(renderer, font, (char*)"Shadow : ", grey);
-    labels[Labels::HoldPieceEnabled] = new Label(renderer, font, (char*)"Hold piece : ", grey);
-    labels[Labels::ShowNextPieceEnabled] = new Label(renderer, font, (char*)"Show next piece : ", grey);
-    labels[Labels::Back] = new Label(renderer, font, (char*)"Back", grey);
-    labels[Labels::On] = new Label(renderer, font, (char*)"On", green);
-    labels[Labels::Off] = new Label(renderer, font, (char*)"Off", red);
-    labels[Labels::Resume] = new Label(renderer, font_big, (char*)"Resume", grey);
-    labels[Labels::Level] = new Label(renderer, font, (char*)"Level: ", grey);
-    labels[Labels::Score] = new Label(renderer, font, (char*)"Score: ", grey);
-}
- 
-void Render::renderText() {
-    int x, y;
-    x = 12 * block_width + border_width; y = 0 * block_height + border_height;
-    labels[Labels::Next]->render(renderer, {x, y});
-    
-    x = 12 * block_width + border_width; y = 8 * block_height + border_height;
-    labels[Labels::Level]->render(renderer, {x, y});
-    dynamic_labels[DynamicLabels::LevelValue]->render(renderer, {x + labels[Labels::Level]->getSufaceSize().x, y});
-
-    x = 12 * block_width + border_width; y = 10 * block_height + border_height;
-    labels[Labels::Score]->render(renderer, {x, y});
-    dynamic_labels[DynamicLabels::ScoreValue]->render(renderer, {x + labels[Labels::Score]->getSufaceSize().x, y});
-
-    x = 12 * block_width + border_width; y = 15 * block_height + border_height;    
-    labels[Labels::Holded]->render(renderer, {x, y});
-}
-
-void Render::renderGrid(const unsigned int grid[10][20]) {  
-    for (int col = 0; col < 10; col++) {
-        for (int row = 0; row < 20; row++) {
-            if (grid[col][row]) {
-                assert(grid[col][row] < 8);
-                SDL_Rect block = {  border_width + block_width * col, 
-                                    border_height + block_height * row, 
-                                    block_width, 
-                                    block_height};   
-                SDL_RenderCopy(renderer, block_colors[grid[col][row]], NULL, &block);
-            }
-        }
-    }
-}
-
-void Render::renderTetromino(const Tetromino& tetromino, bool in_grid_bounds, bool transparent) {
-    if (tetromino.color == 0)
-        return;
-
-    for (int i = 0; i < 4; i++) {
-        if (in_grid_bounds) {
-            assert(tetromino.blocks[i][0] + tetromino.col >= 0 && tetromino.blocks[i][0] + tetromino.col < 10);
-            assert(/*tetromino.blocks[i][1] + tetromino.row > 0 &&*/ tetromino.blocks[i][1] + tetromino.row < 20);
-        }
-
-        if (tetromino.blocks[i][1] + tetromino.row >= 0) {
-            int x = (tetromino.blocks[i][0] + tetromino.col) * block_width + border_width;
-            int y = (tetromino.blocks[i][1] + tetromino.row) * block_height + border_height;
-    
-            SDL_Rect block = {x, y, block_width, block_height};
-        
-            assert(tetromino.color < 9 && tetromino.color);
-            if (transparent)
-                SDL_SetTextureAlphaMod(block_colors[tetromino.color], 50);
-            else  
-                SDL_SetTextureAlphaMod(block_colors[tetromino.color], 255);
-            
-            SDL_RenderCopy(renderer, block_colors[tetromino.color], NULL, &block);
-        }
-    }
-}
-
 
