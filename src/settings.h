@@ -41,7 +41,7 @@ struct State {
     bool new_high_score = false;
     bool enter_player_name = false;
     
-    PlayerAction last_player_action = PlayerAction::None;
+    PlayerAction last_action = PlayerAction::None;
     MenuType context = MenuType::MainMenu;
 
     Cell grid[GAME_FIELD_WIDTH][GAME_FIELD_HEIGHT];

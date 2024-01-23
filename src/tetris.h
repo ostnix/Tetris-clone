@@ -18,11 +18,18 @@ private:
     void handlePlayerAction();
     void gameStep();
 
+    void game();
+    void highScore();
+    void ingameMenu();
+    void mainMenu();
+    void settings();
+    void texturePacks();
+
     State state;
     Input input;
     Timer timer;
 
-    GameView* game;
+    GameView* game_view;
     GameLogic* game_logic;
     HighScore* high_score;
 

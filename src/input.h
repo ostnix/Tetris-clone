@@ -14,10 +14,12 @@ public:
     Input() {}
     ~Input() {}
 
-    PlayerAction getEvent(char* text_input = NULL);
+    PlayerAction getEvent();
+    void getLastTextInput(char* text_input = NULL);
     void keyboardTextInput(bool active = true);
 
 private:
+    char keyboard_input[MAX_TEXT_CHARS] = {'\0'};
 };
 
 #endif /*__INPUT_H__*/
