@@ -353,6 +353,14 @@ bool Render::deleteText(TextId id) {
     return true;
 }
 
+int Render::getCursorId() {
+    return cursor_id;
+}
+
+bool tryLoadTextures(const char* pack_name) {
+    return false;
+}
+
 SDL_Color Render::getColor(Color color) {
     SDL_Color sdl_color = {250, 250, 250};
 
@@ -430,6 +438,3 @@ bool Render::loadFonts() {
     return true;
 }
 
-int Render::getCursorId() {
-    return cursor_id;
-}

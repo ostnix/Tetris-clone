@@ -45,12 +45,13 @@ struct ScreenRect {
 
 static const unsigned int HIGH_SCORE_PLAYERS_NUMBER = 5;
 //static const unsigned int MAXIMUM_NUM_OF_LABELS = 15;
+static const unsigned int MAX_TEXTURE_PACKS = 10;
 static const unsigned int MAX_TEXT_CHARS = 30;
 static const unsigned int BORDER_SIZE = 60;
 static const unsigned int BLOCK_SIZE = 60;
 static const unsigned int MAX_COLORS = 10;
 static const unsigned int MAX_LAYERS = 10;
-static const unsigned int MAX_TEXTS = 30;
+static const unsigned int MAX_TEXTS = 50;
 //static const unsigned int BLOCKED_COLOR = 8;
 
 void concat_strings(char* result, const char* str1, const char* str2);
@@ -91,6 +92,8 @@ public:
     bool deleteText(TextId id);
 
     int getCursorId();
+
+    bool tryLoadTextures(const char* pack_name);
 
 private:
     SDL_Color getColor(Color color);

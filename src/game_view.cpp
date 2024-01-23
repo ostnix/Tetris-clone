@@ -1,7 +1,8 @@
 #include "game_view.h"
 
 GameView::GameView(int width, int height) {
-    
+    getPacksList();
+
     for (int i = 0; i < HIGH_SCORE_PLAYERS_NUMBER; i++) {
         records_text[i] = -1;
     }
@@ -92,10 +93,20 @@ void GameView::updateScreen(State& state) {
     case MenuType::Settings:
         drawSettings(state);
         break;
+
+    case MenuType::TexturePacks:
+        drawTexturePacksList(state);
+        break;
     }
 }
 
+bool GameView::tryLoadTexturePack(unsigned int pack_index) {
+    return false;
+}
 
+unsigned int GameView::getNumberOfTexturePacks() {
+    return number_of_texture_packs;
+}
 
 void GameView::redrawBackground() {
     render->clearLayer(game_view);
@@ -134,6 +145,7 @@ void GameView::createTexts() {
     texts[Texts::Holded] = render->createText(FontType::Normal, "Holded:", Color::Grey);
     texts[Texts::Shadow] = render->createText(FontType::Normal, "Shadow:", Color::Grey);
     texts[Texts::Back] = render->createText(FontType::Normal, "Back", Color::Grey);
+    texts[Texts::CantLoadTexture] = render->createText(FontType::Normal, "Can't Load Texture", Color::Red);
 
     texts[Texts::On] = render->createText(FontType::Normal, "On", Color::Green);
     texts[Texts::Off] = render->createText(FontType::Normal, "Off", Color::Red);;
@@ -145,6 +157,7 @@ void GameView::createTexts() {
     texts[Texts::MainMenu] = render->createText(FontType::Big, "Main Menu", Color::Grey);
     texts[Texts::HighScore] = render->createText(FontType::Big, "High Score", Color::Grey);
     texts[Texts::Pause] = render->createText(FontType::Big, "PAUSE", Color::Grey);
+    texts[Texts::TexturePacks] = render->createText(FontType::Big, "Texture packs", Color::Grey);
 }
 
 void GameView::putTetromino(Tetromino& tetromino, LayerId id) {
@@ -198,7 +211,8 @@ void GameView::drawMainMenu(State& state) {
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::NewGame], render->blockToScreen(Block{7, 4}));
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Settings], render->blockToScreen(Block{7, 7}));
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::HighScore], render->blockToScreen(Block{7, 10}));
-    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Exit], render->blockToScreen(Block{7, 13}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::TexturePacks], render->blockToScreen(Block{7, 13}));
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Exit], render->blockToScreen(Block{7, 16}));
     render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 4 + state.cursor_position * 3}));
     render->renderLayer(game_view);
 
@@ -260,4 +274,28 @@ void GameView::drawHighScore(State& state) {
     }
 
     render->renderLayer(game_view);
+}
+
+void GameView::drawTexturePacksList(State& state) {
+
+}
+
+void GameView::getPacksList() {
+    const char* path = "./textures";
+
+    DIR* dir = opendir(path);
+
+    struct dirent* entry = readdir(dir);
+    entry = readdir(dir);
+    entry = readdir(dir);
+
+    while (entry != NULL) {
+        if (entry->d_type == DT_DIR) {
+            printf("%s\n", entry->d_name);
+        }
+
+        entry = readdir(dir);
+    }
+
+    closedir(dir);
 }
