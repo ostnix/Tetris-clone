@@ -28,6 +28,10 @@ void GameLogic::start() {
 
 bool GameLogic::holdTetromino() {
     if (state.hold_enabled) {
+        if (state.tetrominoes[HOLDED].type == state.tetrominoes[ACTIVE].type) {
+            return false;
+        }
+
         if (state.tetrominoes[HOLDED].getColor() == CellColor::None) {
             state.tetrominoes[HOLDED] = state.tetrominoes[ACTIVE];
             state.tetrominoes[HOLDED].setColor(CellColor::Blank);
@@ -35,7 +39,6 @@ bool GameLogic::holdTetromino() {
             state.tetrominoes[ACTIVE].setColRow(5, 0);
             state.tetrominoes[NEXT] = getTetromino();
             projectShadow();
-            return true;
         }
         else if (state.tetrominoes[HOLDED].getColor() != CellColor::Blank) {
             Tetromino tetromino = state.tetrominoes[ACTIVE];
@@ -44,8 +47,8 @@ bool GameLogic::holdTetromino() {
             state.tetrominoes[HOLDED] = tetromino;
             state.tetrominoes[HOLDED].setColor(CellColor::Blank);
             projectShadow();
-            return true;
         }
+        return true;
     }
     return false;
 }

@@ -413,6 +413,7 @@ void Render::deleteTextures() {
     SDL_DestroyTexture(custom_textures[0]);
     SDL_DestroyTexture(custom_textures[1]);
     SDL_DestroyTexture(custom_textures[2]);
+    SDL_DestroyTexture(custom_textures[3]);
 }
 
 bool Render::loadTextures(const char* path_to_textures) {
@@ -446,6 +447,9 @@ bool Render::loadTextures(const char* path_to_textures) {
     concat_strings(full_path, path_to_textures, "/grid.png");
     custom_textures[2] = IMG_LoadTexture(renderer, full_path);
 
+    concat_strings(full_path, path_to_textures, "/menu_background.png");
+    custom_textures[3] = IMG_LoadTexture(renderer, full_path);
+
     for (int i = 1; i < MAX_COLORS; i++) {
         SDL_SetTextureBlendMode(block_colors[i], SDL_BLENDMODE_BLEND);
     }
@@ -461,7 +465,8 @@ bool Render::loadTextures(const char* path_to_textures) {
         block_colors[9] &&
         custom_textures[0] &&
         custom_textures[1] &&
-        custom_textures[2]);
+        custom_textures[2] &&
+        custom_textures[3]);
 }
 
 bool Render::loadFonts() {

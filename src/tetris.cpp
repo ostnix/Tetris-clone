@@ -163,6 +163,11 @@ void Tetris::handlePlayerAction() {
                     break;
                 }
                 break;
+            
+            case PlayerAction::ESC:
+                state.context = MenuType::Game;
+                game->updateScreen(state);
+                break;
             }
             break;
 
@@ -232,6 +237,8 @@ void Tetris::handlePlayerAction() {
                 game->updateScreen(state);
                 break;
 
+            case PlayerAction::Left:
+            case PlayerAction::Right:
             case PlayerAction::Enter:
                 switch (state.cursor_position) {
                 case 0:
@@ -250,9 +257,11 @@ void Tetris::handlePlayerAction() {
                     break;
 
                 case 3:
-                    state.cursor_position = 0;
-                    state.context = MenuType::MainMenu;
-                    game->updateScreen(state);
+                    if (last_action == PlayerAction::Enter) {
+                        state.cursor_position = 0;
+                        state.context = MenuType::MainMenu;
+                        game->updateScreen(state);
+                    }
                     break;
                 }
                 break;

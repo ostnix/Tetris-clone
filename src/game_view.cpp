@@ -211,11 +211,11 @@ void GameView::drawGame(State& state) {
 
 void GameView::drawIngameMenu(State& state) {
     render->clearLayer(ingame_menu);
-    render->putOnLayer(game_view, RenderObjectType::Layer, game_grid, render->blockToScreen(BlockRect{1, 1, 10, 20}));
-
+    render->putOnLayer(ingame_menu, RenderObjectType::Custom, 3, render->blockToScreen(Block{0, 0}));
     render->putOnLayer(ingame_menu, RenderObjectType::Text, texts[Texts::Resume], render->blockToScreen(Block{3, 1}));
     render->putOnLayer(ingame_menu, RenderObjectType::Text, texts[Texts::MainMenu], render->blockToScreen(Block{3, 4}));
     render->putOnLayer(ingame_menu, RenderObjectType::Custom, 1, render->blockToScreen(Block{1, 1 + state.cursor_position * 4}));
+    render->putOnLayer(game_view, RenderObjectType::Layer, game_grid, render->blockToScreen(BlockRect{1, 1, 10, 20}));
     render->putOnLayer(game_view, RenderObjectType::Layer, ingame_menu, render->blockToScreen(BlockRect{5, 5, 15, 15}));
 
     render->renderLayer(game_view);
@@ -223,6 +223,7 @@ void GameView::drawIngameMenu(State& state) {
 
 void GameView::drawMainMenu(State& state) {
     render->clearLayer(game_view);
+    render->putOnLayer(game_view, RenderObjectType::Custom, 3, render->blockToScreen(Block{0, 0}));
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::NewGame], render->blockToScreen(Block{7, 4}));
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Settings], render->blockToScreen(Block{7, 7}));
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::HighScore], render->blockToScreen(Block{7, 10}));
