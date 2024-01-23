@@ -31,7 +31,7 @@ private:
     void drawSettings(State& state);
     void drawHighScore(State& state);
     void drawTexturePacksList(State& state);
-    void drawNewHighScore(State& state);
+    void drawNewRecord(State& state);
     void getPacksList();
 
     enum Texts {Next = 0, Holded = 1, Pause = 2, Score = 3, Level = 4, ScoreVal = 5, 

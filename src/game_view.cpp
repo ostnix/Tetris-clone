@@ -71,7 +71,7 @@ void GameView::updateGrid(State& state) {
 
 void GameView::updateScreen(State& state) {
     if (state.enter_player_name) {
-        drawNewHighScore(state);
+        drawNewRecord(state);
         render->updateText(player_name, FontType::Normal, "", Color::Blue);
         return;
     }
@@ -104,8 +104,7 @@ void GameView::updateScreen(State& state) {
 }
 
 bool GameView::tryLoadTexturePack(unsigned int pack_index) {
-    assert(render->tryLoadTextures(pack_folders_names[pack_index]));
-    return true;
+    return render->tryLoadTextures(pack_folders_names[pack_index]);
 }
 
 unsigned int GameView::getNumberOfTexturePacks() {
@@ -279,15 +278,15 @@ void GameView::drawHighScore(State& state) {
             records_text[i] = render->createText(FontType::Normal, record, Color::Blue);
         }
         else if (state.new_high_score) {
-            state.new_high_score = false;
             char record[MAX_TEXT_CHARS] = {'\0'};
             concat_strings(record, state.records[i].name, ": ");
             add_num(record, state.records[i].score);
-            records_text[i] = render->updateText(records_text[i], FontType::Normal, record, Color::Blue);
+            render->updateText(records_text[i], FontType::Normal, record, Color::Blue);
         }
 
         render->putOnLayer(game_view, RenderObjectType::Text, records_text[i], render->blockToScreen(Block{7, 5 + i * 2}));
     }
+    state.new_high_score = false;
 
     render->renderLayer(game_view);
 }
@@ -303,7 +302,7 @@ void GameView::drawTexturePacksList(State& state) {
     render->renderLayer(game_view);
 }
 
-void GameView::drawNewHighScore(State& state) {
+void GameView::drawNewRecord(State& state) {
     render->putOnLayer(game_view, RenderObjectType::Layer, game_grid, render->blockToScreen(BlockRect{1, 1, 10, 20}));
     render->clearLayer(ingame_menu);
     if (player_name == -1) {
@@ -317,8 +316,6 @@ void GameView::drawNewHighScore(State& state) {
     render->putOnLayer(ingame_menu, RenderObjectType::Text, player_name, render->blockToScreen(Block{1, 7}));
     render->putOnLayer(game_view, RenderObjectType::Layer, ingame_menu, render->blockToScreen(BlockRect{5, 5, 15, 15}));
     render->renderLayer(game_view);
-
-    state.new_high_score = false;
 }
 
 void GameView::getPacksList() {

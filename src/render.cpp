@@ -314,7 +314,11 @@ bool Render::updateText(TextId id, FontType font_type, const char* text, Color c
 
     switch (font_type) {
     case FontType::Normal:
-        surface = TTF_RenderUTF8_Solid(font, text, getColor(color)); 
+        if (text[0] != '\0')
+            surface = TTF_RenderUTF8_Solid(font, text, getColor(color)); 
+        else 
+            surface = TTF_RenderUTF8_Solid(font, " ", getColor(color));
+
         texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
         if (!texture)
@@ -322,7 +326,11 @@ bool Render::updateText(TextId id, FontType font_type, const char* text, Color c
         break;
 
     case FontType::Big:
-        surface = TTF_RenderUTF8_Solid(font_big, text, getColor(color)); 
+        if (text[0] != '\0')
+            surface = TTF_RenderUTF8_Solid(font, text, getColor(color));
+        else
+            surface = TTF_RenderUTF8_Solid(font, " ", getColor(color));
+
         texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_FreeSurface(surface);
         if (!texture)

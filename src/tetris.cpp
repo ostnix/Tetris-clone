@@ -2,6 +2,7 @@
 
 Tetris::Tetris(int width, int height, unsigned int start_level) {
     game = new GameView(width, height);
+    input.keyboardTextInput(false);
     game_logic = new GameLogic(state);
     high_score = new HighScore();
     state.records = high_score->getRecords();
@@ -61,7 +62,9 @@ void Tetris::handlePlayerAction() {
                 }
                 else if (last_action == PlayerAction::BackSpace) {
                     int index = strlen(state.player_name);
-                    state.player_name[index - 1] = '\0';
+                    if (index > 0)
+                        state.player_name[index - 1] = '\0';
+
                     game->updateScreen(state);
                 }
                 else if (text_input[0] != '\x1' && (strlen(state.player_name) + strlen(text_input) < MAX_TEXT_CHARS)) {
@@ -75,6 +78,7 @@ void Tetris::handlePlayerAction() {
                 state.paused = false;
                 game->updateScreen(state);
                 game->draw(state);
+                return;
             }
 
             if (state.game_ended) {

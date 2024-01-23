@@ -73,8 +73,10 @@ PlayerAction Input::getEvent(char* text_input) {
 }
 
 void Input::keyboardTextInput(bool active) {
-    if (active)
+    if (active) {
         SDL_StartTextInput();
-    else 
+    }
+    else {
         SDL_StopTextInput();
+    }
 }
