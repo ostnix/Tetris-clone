@@ -27,9 +27,16 @@ GameView::~GameView() {
 }
 
 void GameView::draw(State& state) {
-    if (state.paused) {
+    if (state.paused) {           
+        render->putOnLayer(game_view, RenderObjectType::Layer, game_grid, render->blockToScreen(BlockRect{1, 1, 10, 20}));            
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Pause], render->blockToScreen(Block{8, 10}));    
+        render->renderLayer(game_view);
+        return;
+    }
+
+    if (state.game_ended) {
         render->putOnLayer(game_view, RenderObjectType::Layer, game_grid, render->blockToScreen(BlockRect{1, 1, 10, 20}));
-        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Pause], render->blockToScreen(Block{8, 10}));
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::GameEnd], render->blockToScreen(Block{8, 10}));
         render->renderLayer(game_view);
         return;
     }
@@ -57,12 +64,15 @@ void GameView::updateGrid(State& state) {
     }
 
     putTetromino(state.tetrominoes[ACTIVE], game_grid);
-    putTetromino(state.tetrominoes[SHADOW], game_grid);
+    if (state.shadow_enabled) {
+        putTetromino(state.tetrominoes[SHADOW], game_grid);
+    }
 }
 
 void GameView::updateScreen(State& state) {
     if (state.enter_player_name) {
         drawNewHighScore(state);
+        render->updateText(player_name, FontType::Normal, "", Color::Blue);
         return;
     }
 
@@ -152,6 +162,7 @@ void GameView::createTexts() {
     texts[Texts::MainMenu] = render->createText(FontType::Big, "Main Menu", Color::Grey);
     texts[Texts::HighScore] = render->createText(FontType::Big, "High Score", Color::Grey);
     texts[Texts::Pause] = render->createText(FontType::Big, "PAUSE", Color::Grey);
+    texts[Texts::GameEnd] = render->createText(FontType::Big, "GAME END", Color::Red);
     texts[Texts::TexturePacks] = render->createText(FontType::Big, "Texture packs", Color::Grey);
     texts[Texts::NewHighScore] = render->createText(FontType::Big, "New High Score!!!", Color::Green);
 
@@ -185,13 +196,17 @@ void GameView::drawGame(State& state) {
     }
 
     redrawBackground();
-    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{12, 5}));
-    state.tetrominoes[NEXT].setColRow(18, 5);
-    putTetromino(state.tetrominoes[NEXT], game_view);
+    if (state.show_next_piece_enabled) {
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Next], render->blockToScreen(Block{12, 5}));
+        state.tetrominoes[NEXT].setColRow(18, 5);
+        putTetromino(state.tetrominoes[NEXT], game_view);
+    }
 
-    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Holded], render->blockToScreen(Block{12, 9}));
-    state.tetrominoes[HOLDED].setColRow(18, 9);
-    putTetromino(state.tetrominoes[HOLDED], game_view);
+    if (state.hold_enabled) {
+        render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Holded], render->blockToScreen(Block{12, 9}));
+        state.tetrominoes[HOLDED].setColRow(18, 9);
+        putTetromino(state.tetrominoes[HOLDED], game_view);
+    }
 }
 
 void GameView::drawIngameMenu(State& state) {
@@ -247,7 +262,7 @@ void GameView::drawSettings(State& state) {
         render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Off], render->blockToScreen(Block{12, 8}));
     }
 
-    render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 6 + state.cursor_position * 2}));
+    render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{5, 4 + state.cursor_position * 2}));
     render->renderLayer(game_view);
 }
 
@@ -301,6 +316,8 @@ void GameView::drawNewHighScore(State& state) {
     render->putOnLayer(ingame_menu, RenderObjectType::Text, player_name, render->blockToScreen(Block{1, 7}));
     render->putOnLayer(game_view, RenderObjectType::Layer, ingame_menu, render->blockToScreen(BlockRect{5, 5, 15, 15}));
     render->renderLayer(game_view);
+
+    state.new_high_score = false;
 }
 
 void GameView::getPacksList() {

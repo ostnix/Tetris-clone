@@ -77,6 +77,12 @@ void Tetris::handlePlayerAction() {
                 game->draw(state);
             }
 
+            if (state.game_ended) {
+                state.context = MenuType::MainMenu;
+                game->updateScreen(state);
+                return;
+            }
+
             switch (last_action) {
             case PlayerAction::Left:
                 if (game_logic->moveLeft())
@@ -289,7 +295,7 @@ void Tetris::handlePlayerAction() {
 }
 
 void Tetris::gameStep() {
-    if (state.paused || state.new_high_score)
+    if (state.paused || state.new_high_score || state.game_ended)
         return;
 
     if (state.context == MenuType::Game) {
@@ -331,8 +337,12 @@ void Tetris::gameStep() {
                 state.enter_player_name = true;
                 input.keyboardTextInput(true);
                 game->updateScreen(state);
-                return;
+
             }
+            else {
+                game->draw(state);
+            }
+            return;
         }
 
         game->draw(state);
