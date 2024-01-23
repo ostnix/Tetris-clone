@@ -61,15 +61,8 @@ void GameView::updateGrid(State& state) {
 }
 
 void GameView::updateScreen(State& state) {
-    if (state.new_high_score) {
-        if (player_name == -1) {
-            render->createText(FontType::Normal, state.player_name, Color::Blue);
-        }
-        else {
-            render->updateText(player_name, FontType::Normal, state.player_name, Color::Blue);
-        }
-        render->putOnLayer(game_view, RenderObjectType::Text, Texts::HighScore, render->blockToScreen(Block{5, 5}));
-        render->putOnLayer(game_view, RenderObjectType::Text, player_name, render->blockToScreen(Block{10, 5}));
+    if (state.enter_player_name) {
+        drawNewHighScore(state);
         return;
     }
 
@@ -147,6 +140,7 @@ void GameView::createTexts() {
     texts[Texts::Shadow] = render->createText(FontType::Normal, "Shadow:", Color::Grey);
     texts[Texts::Back] = render->createText(FontType::Normal, "Back", Color::Grey);
     texts[Texts::CantLoadTexture] = render->createText(FontType::Normal, "Can't Load Texture", Color::Red);
+    texts[Texts::EnterName] = render->createText(FontType::Normal, "Enter name:", Color::Green);
 
     texts[Texts::On] = render->createText(FontType::Normal, "On", Color::Green);
     texts[Texts::Off] = render->createText(FontType::Normal, "Off", Color::Red);;
@@ -159,6 +153,7 @@ void GameView::createTexts() {
     texts[Texts::HighScore] = render->createText(FontType::Big, "High Score", Color::Grey);
     texts[Texts::Pause] = render->createText(FontType::Big, "PAUSE", Color::Grey);
     texts[Texts::TexturePacks] = render->createText(FontType::Big, "Texture packs", Color::Grey);
+    texts[Texts::NewHighScore] = render->createText(FontType::Big, "New High Score!!!", Color::Green);
 
     for (int i = 0; i < number_of_texture_packs; i++) {
         texture_pack_folders[i] = render->createText(FontType::Normal, pack_folders_names[i], Color::Grey);
@@ -289,6 +284,22 @@ void GameView::drawTexturePacksList(State& state) {
     }
     render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Back], render->blockToScreen(Block{5, 2 + (int)number_of_texture_packs * 2}));
     render->putOnLayer(game_view, RenderObjectType::Custom, 1, render->blockToScreen(Block{1, 2 + state.cursor_position * 2}));
+    render->renderLayer(game_view);
+}
+
+void GameView::drawNewHighScore(State& state) {
+    render->putOnLayer(game_view, RenderObjectType::Layer, game_grid, render->blockToScreen(BlockRect{1, 1, 10, 20}));
+    render->clearLayer(ingame_menu);
+    if (player_name == -1) {
+        player_name = render->createText(FontType::Normal, state.player_name, Color::Blue);
+    }
+    else {
+        render->updateText(player_name, FontType::Normal, state.player_name, Color::Blue);
+    }
+    render->putOnLayer(ingame_menu, RenderObjectType::Text, texts[Texts::NewHighScore], render->blockToScreen(Block{0, 0}));
+    render->putOnLayer(ingame_menu, RenderObjectType::Text, texts[Texts::EnterName], render->blockToScreen(Block{1, 5}));
+    render->putOnLayer(ingame_menu, RenderObjectType::Text, player_name, render->blockToScreen(Block{1, 7}));
+    render->putOnLayer(game_view, RenderObjectType::Layer, ingame_menu, render->blockToScreen(BlockRect{5, 5, 15, 15}));
     render->renderLayer(game_view);
 }
 

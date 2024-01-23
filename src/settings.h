@@ -17,14 +17,14 @@ static const unsigned int HOLDED = 1;
 static const unsigned int SHADOW = 0;
 
 enum class MenuType {MainMenu, Settings, InGameMenu, HighScore, Game, TexturePacks};
-enum class PlayerAction {None, Down, Up, Left, Right, FastDrop, HoldPiece, Exit, Pause, ESC, Enter, SymbolInput, Action, OtherKey};
+enum class PlayerAction {None, Down, Up, Left, Right, FastDrop, HoldPiece, Exit, Pause, ESC, Enter, BackSpace, SymbolInput, Action, OtherKey};
 
 struct Settings {
 };
 
 struct State {
     // game state
-    unsigned int score = 0;
+    int score = 0;
     unsigned int level = 0;
     unsigned char cursor_position = 0;
 
@@ -39,6 +39,7 @@ struct State {
     bool update_score = false;
     bool update_level = false;
     bool new_high_score = false;
+    bool enter_player_name = false;
     
     PlayerAction last_player_action = PlayerAction::None;
     MenuType context = MenuType::MainMenu;

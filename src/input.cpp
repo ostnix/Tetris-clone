@@ -59,6 +59,10 @@ PlayerAction Input::getEvent(char* text_input) {
             return PlayerAction::Enter;
             break;
 
+        case SDLK_BACKSPACE:
+            return PlayerAction::BackSpace;
+            break;
+
         default:
             return PlayerAction::OtherKey;
             break;

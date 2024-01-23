@@ -50,16 +50,21 @@ void Tetris::handlePlayerAction() {
 
         switch (state.context) {
         case MenuType::Game:
-            if (state.new_high_score) {
+            if (state.enter_player_name) {
                 if (last_action == PlayerAction::Enter) {
                     high_score->writeNewRecord(state.player_name, state.score);
                     input.keyboardTextInput(false);
+                    state.enter_player_name = false;
                     state.context = MenuType::HighScore;
                     game->updateScreen(state);
                     return;
                 }
-
-                if (text_input[0] != '\x1' && (strlen(state.player_name) + strlen(text_input) < MAX_TEXT_CHARS)) {
+                else if (last_action == PlayerAction::BackSpace) {
+                    int index = strlen(state.player_name);
+                    state.player_name[index - 1] = '\0';
+                    game->updateScreen(state);
+                }
+                else if (text_input[0] != '\x1' && (strlen(state.player_name) + strlen(text_input) < MAX_TEXT_CHARS)) {
                     strcat(state.player_name, text_input);
                     game->updateScreen(state);
                 }
@@ -323,8 +328,10 @@ void Tetris::gameStep() {
         if (state.game_ended) {
             if (high_score->checkForNewRecord(state.score)) {
                 state.new_high_score = true;
+                state.enter_player_name = true;
                 input.keyboardTextInput(true);
                 game->updateScreen(state);
+                return;
             }
         }
 
