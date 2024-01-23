@@ -17,7 +17,7 @@ static const unsigned int HOLDED = 1;
 static const unsigned int SHADOW = 0;
 
 enum class MenuType {MainMenu, Settings, InGameMenu, HighScore, Game, TexturePacks};
-enum class PlayerAction {None, Down, Up, Left, Right, FastDrop, HoldPiece, Exit, Pause, ESC, Enter, BackSpace, SymbolInput, Action, OtherKey};
+enum class PlayerAction {None, Down, Up, Left, Right, FastDrop, HoldPiece, Exit, Pause, ESC, Enter, BackSpace, SymbolInput, Action, OtherKey, SystemKey};
 
 struct Settings {
 };

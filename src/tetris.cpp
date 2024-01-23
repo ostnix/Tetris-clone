@@ -49,6 +49,9 @@ void Tetris::handlePlayerAction() {
             return;
         }
 
+        if (last_action == PlayerAction::SystemKey)
+            return;
+
         switch (state.context) {
         case MenuType::Game:
             if (state.enter_player_name) {

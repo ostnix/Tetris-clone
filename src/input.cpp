@@ -63,6 +63,12 @@ PlayerAction Input::getEvent(char* text_input) {
             return PlayerAction::BackSpace;
             break;
 
+        case SDLK_RALT:
+        case SDLK_LALT:
+        case SDLK_PRINTSCREEN:
+            return PlayerAction::SystemKey;
+            break;
+
         default:
             return PlayerAction::OtherKey;
             break;
