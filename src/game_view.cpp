@@ -158,6 +158,10 @@ void GameView::createTexts() {
     texts[Texts::HighScore] = render->createText(FontType::Big, "High Score", Color::Grey);
     texts[Texts::Pause] = render->createText(FontType::Big, "PAUSE", Color::Grey);
     texts[Texts::TexturePacks] = render->createText(FontType::Big, "Texture packs", Color::Grey);
+
+    for (int i = 0; i < number_of_texture_packs; i++) {
+        texture_pack_folders[i] = render->createText(FontType::Normal, pack_folders_names[i], Color::Grey);
+    }
 }
 
 void GameView::putTetromino(Tetromino& tetromino, LayerId id) {
@@ -277,7 +281,13 @@ void GameView::drawHighScore(State& state) {
 }
 
 void GameView::drawTexturePacksList(State& state) {
+    render->clearLayer(game_view);
 
+    for (int i = 0; i < number_of_texture_packs; i++) {
+        render->putOnLayer(game_view, RenderObjectType::Text, texture_pack_folders[i], render->blockToScreen(Block{5, 2 + i * 2}));
+    }
+    render->putOnLayer(game_view, RenderObjectType::Text, texts[Texts::Back], render->blockToScreen(Block{5, 2 + (int)number_of_texture_packs * 2}));
+    render->renderLayer(game_view);
 }
 
 void GameView::getPacksList() {
@@ -290,8 +300,9 @@ void GameView::getPacksList() {
     entry = readdir(dir);
 
     while (entry != NULL) {
-        if (entry->d_type == DT_DIR) {
-            printf("%s\n", entry->d_name);
+        if (entry->d_type == DT_DIR && number_of_texture_packs < MAX_TEXTURE_PACKS) {
+            strcpy(pack_folders_names[number_of_texture_packs], entry->d_name);
+            number_of_texture_packs++;
         }
 
         entry = readdir(dir);
