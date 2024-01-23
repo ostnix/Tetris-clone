@@ -8,7 +8,7 @@
 
 class Tetris {
 public:
-    Tetris(int width, int height, unsigned int start_level = 0);
+    Tetris(int width, int height);
     ~Tetris();
 
     void start();
@@ -33,7 +33,7 @@ private:
     GameLogic* game_logic;
     HighScore* high_score;
 
-    unsigned int move_delay_per_level[30] = {
+    const unsigned int move_delay_per_level[30] = {
                                         48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
                                         5, 5, 5, 4, 4, 4, 3, 3, 3, 2,
                                         2, 2, 2, 2, 2, 2, 2, 2, 2, 1

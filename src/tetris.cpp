@@ -1,6 +1,6 @@
 #include "tetris.h"
 
-Tetris::Tetris(int width, int height, unsigned int start_level) {
+Tetris::Tetris(int width, int height) {
     game_view = new GameView(width, height);
     input.keyboardTextInput(false);
     game_logic = new GameLogic(state);
@@ -8,13 +8,6 @@ Tetris::Tetris(int width, int height, unsigned int start_level) {
     state.records = high_score->getRecords();
 
     state.context = MenuType::MainMenu;
-
-    if (start_level <= 29) {
-        state.level = start_level;
-    }
-    else {
-        state.level = 29;
-    }
 }
 
 Tetris::~Tetris() {
