@@ -9,6 +9,11 @@ GameLogic::~GameLogic() {
 }
 
 void GameLogic::start() {
+    if (state.level < 30)
+        lines_before_next_level = lines_per_level[state.level];
+    else 
+        lines_before_next_level = lines_per_level[29];
+    
     for (int col = 0; col < GAME_FIELD_WIDTH; col++) {
         for (int row = 0; row < GAME_FIELD_HEIGHT; row++) {
             state.grid[col][row].col = col;
@@ -199,9 +204,10 @@ void GameLogic::updateScoreAndLevel(unsigned int filled_lines) {
     state.score += score_multiplyer * (state.level + 1);
     state.update_score = true;
     if (state.level < 29) {
-        lines_per_level[state.level] -= filled_lines;
-        if (lines_per_level[state.level] <= 0) {
+        lines_before_next_level -= filled_lines;
+        if (lines_before_next_level <= 0) {
             state.level++;
+            lines_before_next_level = lines_per_level[state.level];
             state.update_level = true;
         }
     }

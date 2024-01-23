@@ -193,6 +193,8 @@ void Tetris::handlePlayerAction() {
                     state.player_name[0] = '\0';
                     state.level = 0;
                     state.score = 0;
+                    state.update_score = true;
+                    state.update_level = true;
                     state.delay = move_delay_per_level[state.level];
                     state.game_ended = false;
                     state.context = MenuType::Game;
