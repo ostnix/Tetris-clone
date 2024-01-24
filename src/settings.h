@@ -3,6 +3,7 @@
 
 #include "tetromino.h"
 #include "high_score.h"
+#include "sound.h"
 
 static const unsigned int FRAME_RATE = 60;
 
@@ -17,7 +18,7 @@ static const unsigned int HOLDED = 1;
 static const unsigned int SHADOW = 0;
 
 enum class MenuType {MainMenu, Settings, InGameMenu, HighScore, Game, TexturePacks};
-enum class PlayerAction {None, Down, Up, Left, Right, FastDrop, HoldPiece, Exit, Pause, ESC, Enter, BackSpace, SymbolInput, Action, OtherKey};
+enum class PlayerAction {None, Down, Up, Left, Right, FastDrop, HoldPiece, Exit, Pause, ESC, Enter, BackSpace, SymbolInput, Action, OtherKey, SystemKey};
 
 struct Settings {
 };
@@ -41,8 +42,9 @@ struct State {
     bool new_high_score = false;
     bool enter_player_name = false;
     
-    PlayerAction last_player_action = PlayerAction::None;
+    PlayerAction last_action = PlayerAction::None;
     MenuType context = MenuType::MainMenu;
+    SoundEffect sound_to_play = SoundEffect::None;
 
     Cell grid[GAME_FIELD_WIDTH][GAME_FIELD_HEIGHT];
 

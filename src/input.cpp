@@ -1,6 +1,6 @@
 #include "input.h"
 
-PlayerAction Input::getEvent(char* text_input) {
+PlayerAction Input::getEvent() {
     SDL_Event event;
 
     if (!SDL_PollEvent(&event)) {
@@ -13,7 +13,7 @@ PlayerAction Input::getEvent(char* text_input) {
         break;
     
     case SDL_TEXTINPUT:
-        strcpy(text_input, event.text.text);
+        strcpy(keyboard_input, event.text.text);
         return PlayerAction::OtherKey;
         break;
 
@@ -63,6 +63,12 @@ PlayerAction Input::getEvent(char* text_input) {
             return PlayerAction::BackSpace;
             break;
 
+        case SDLK_RALT:
+        case SDLK_LALT:
+        case SDLK_PRINTSCREEN:
+            return PlayerAction::SystemKey;
+            break;
+
         default:
             return PlayerAction::OtherKey;
             break;
@@ -70,6 +76,13 @@ PlayerAction Input::getEvent(char* text_input) {
         break;
     }
     return PlayerAction::None;
+}
+
+void Input::getLastTextInput(char* text_input) {
+    if (text_input) {
+        strcpy(text_input, keyboard_input);
+        keyboard_input[0] = '\0';
+    }
 }
 
 void Input::keyboardTextInput(bool active) {
