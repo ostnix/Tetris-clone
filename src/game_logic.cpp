@@ -104,6 +104,7 @@ bool GameLogic::moveLeft() {
     state.tetrominoes[ACTIVE].moveLeft();
     if (!isValidPosition(state.tetrominoes[ACTIVE])) {
         state.tetrominoes[ACTIVE].moveRight();
+        state.sound_to_play = SoundEffect::WrongMove;
         return false;
     }
     
@@ -115,6 +116,7 @@ bool GameLogic::moveRight() {
     state.tetrominoes[ACTIVE].moveRight();
     if (!isValidPosition(state.tetrominoes[ACTIVE])) {
         state.tetrominoes[ACTIVE].moveLeft();
+        state.sound_to_play = SoundEffect::WrongMove;
         return false;
     }
 
@@ -201,6 +203,13 @@ void GameLogic::updateScoreAndLevel(unsigned int filled_lines) {
         break;
     }
     
+    if (filled_lines < 4 && filled_lines > 0) {
+        state.sound_to_play = SoundEffect::LineCleared;
+    }
+    else if (filled_lines == 4) {
+        state.sound_to_play = SoundEffect::FourLinesCleared;
+    }
+
     state.score += score_multiplyer * (state.level + 1);
     state.update_score = true;
     if (state.level < 29) {

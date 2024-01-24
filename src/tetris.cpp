@@ -2,16 +2,21 @@
 
 Tetris::Tetris(int width, int height) {
     game_view = new GameView(width, height);
-    input.keyboardTextInput(false);
+    input = new Input();
+    sound = new Sound();
     game_logic = new GameLogic(state);
     high_score = new HighScore();
-    state.records = high_score->getRecords();
 
+    state.records = high_score->getRecords();
     state.context = MenuType::MainMenu;
+
+    assert(sound->loadSounds());
 }
 
 Tetris::~Tetris() {
     delete game_logic;
+    delete sound;
+    delete input;
     delete game_view;
     delete high_score;
 }
@@ -26,6 +31,8 @@ void Tetris::gameLoop() {
     while(!state.quit_game) {
         handlePlayerAction();
         gameStep();
+        sound->playSound(state.sound_to_play);
+        state.sound_to_play = SoundEffect::None;
         timer.wait();
     }
 }
@@ -33,7 +40,7 @@ void Tetris::gameLoop() {
 void Tetris::handlePlayerAction() {
     state.last_action = PlayerAction::None;
 
-    while ((state.last_action = input.getEvent()) != PlayerAction::None) {
+    while ((state.last_action = input->getEvent()) != PlayerAction::None) {
 
         if (state.last_action == PlayerAction::Exit) {
             state.quit_game = true;
@@ -49,26 +56,40 @@ void Tetris::handlePlayerAction() {
             break;
 
         case MenuType::HighScore:
+            playMenuSound();
             highScore();
             break;
 
         case MenuType::InGameMenu:
+            playMenuSound();
             ingameMenu();
             break;
 
         case MenuType::MainMenu:
+            playMenuSound();
             mainMenu();
             break;
 
 
         case MenuType::Settings:
+            playMenuSound();
             settings();
             break;
         
         case MenuType::TexturePacks:
+            playMenuSound();
             texturePacks();
             break;
         } 
+    }
+}
+
+void Tetris::playMenuSound() {
+    if (state.last_action == PlayerAction::Down || state.last_action == PlayerAction::Up) {
+        state.sound_to_play = SoundEffect::MenuMove;
+    }
+    else if (state.last_action == PlayerAction::Enter) {
+        state.sound_to_play = SoundEffect::MenuSelect;
     }
 }
 
@@ -111,13 +132,15 @@ void Tetris::gameStep() {
 
         if (state.game_ended) {
             if (high_score->checkForNewRecord(state.score)) {
+                state.sound_to_play = SoundEffect::NewHighScore;
                 state.new_high_score = true;
                 state.enter_player_name = true;
-                input.keyboardTextInput(true);
+                input->keyboardTextInput(true);
                 game_view->updateScreen(state);
 
             }
             else {
+                state.sound_to_play = SoundEffect::GameEnd;
                 game_view->draw(state);
             }
             return;
@@ -131,16 +154,17 @@ void Tetris::gameStep() {
 void Tetris::game() {
     if (state.enter_player_name) {
         char text_input[MAX_TEXT_CHARS] = {'\0'};
-        input.getLastTextInput(text_input);
+        input->getLastTextInput(text_input);
         if (state.last_action == PlayerAction::Enter) {
             high_score->writeNewRecord(state.player_name, state.score);
-            input.keyboardTextInput(false);
+            input->keyboardTextInput(false);
             state.enter_player_name = false;
             state.context = MenuType::HighScore;
             game_view->updateScreen(state);
             return;
         }
         else if (state.last_action == PlayerAction::BackSpace) {
+            state.sound_to_play = SoundEffect::Typing;
             int index = strlen(state.player_name);
             if (index > 0)
                 state.player_name[index - 1] = '\0';
@@ -148,6 +172,7 @@ void Tetris::game() {
             game_view->updateScreen(state);
         }
         else if (text_input[0] != '\x1' && (strlen(state.player_name) + strlen(text_input) < MAX_TEXT_CHARS)) {
+            state.sound_to_play = SoundEffect::Typing;
             strcat(state.player_name, text_input);
             game_view->updateScreen(state);
         }
@@ -189,6 +214,7 @@ void Tetris::game() {
 
     case PlayerAction::FastDrop:
         state.instant_drop = true;
+        state.sound_to_play = SoundEffect::FastDrop;
         game_logic->moveDown(state.instant_drop);
         game_view->updateGrid(state);
         break;

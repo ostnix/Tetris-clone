@@ -3,6 +3,7 @@
 
 #include "tetromino.h"
 #include "high_score.h"
+#include "sound.h"
 
 static const unsigned int FRAME_RATE = 60;
 
@@ -43,6 +44,7 @@ struct State {
     
     PlayerAction last_action = PlayerAction::None;
     MenuType context = MenuType::MainMenu;
+    SoundEffect sound_to_play = SoundEffect::None;
 
     Cell grid[GAME_FIELD_WIDTH][GAME_FIELD_HEIGHT];
 

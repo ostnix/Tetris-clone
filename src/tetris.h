@@ -1,6 +1,7 @@
 #ifndef __TETRIS_H__
 #define __TETRIS_H__
 
+#include "sound.h"
 #include "timer.h"
 #include "input.h"
 #include "game_view.h"
@@ -16,6 +17,7 @@ public:
 private:
     void gameLoop();
     void handlePlayerAction();
+    void playMenuSound();
     void gameStep();
 
     void game();
@@ -26,9 +28,10 @@ private:
     void texturePacks();
 
     State state;
-    Input input;
     Timer timer;
 
+    Sound* sound;
+    Input* input;
     GameView* game_view;
     GameLogic* game_logic;
     HighScore* high_score;

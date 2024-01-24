@@ -11,7 +11,7 @@
 
 class Input {
 public:
-    Input() {}
+    Input() { SDL_StopTextInput(); }
     ~Input() {}
 
     PlayerAction getEvent();
