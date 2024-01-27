@@ -49,6 +49,11 @@ bool GameLogic::holdTetromino() {
             Tetromino tetromino = state.tetrominoes[ACTIVE];
             state.tetrominoes[ACTIVE] = state.tetrominoes[HOLDED];
             state.tetrominoes[ACTIVE].setColRow(tetromino.getCol(), tetromino.getRow());
+            if (!isValidPosition(state.tetrominoes[ACTIVE])) {
+                state.tetrominoes[ACTIVE] = tetromino;
+                return false;
+            }
+
             state.tetrominoes[HOLDED] = tetromino;
             state.tetrominoes[HOLDED].setColor(CellColor::Blank);
         }
