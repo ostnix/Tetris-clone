@@ -5,6 +5,7 @@ json-c.dll
 SDL2.dll
 SDL2_image.dll
 SDL2_ttf.dll
+SDL2_mixer.dll
 tetris.exe
 tetris-clone.exe
 tetris

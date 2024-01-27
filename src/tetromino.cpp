@@ -1,13 +1,19 @@
 #include "tetromino.h"
 
 Tetromino::Tetromino(TetrominoType _type) : type(_type) {
-    
+    num_of_cells = 4;
+
     if (type != TetrominoType::None) {
         unsigned int t = (unsigned int)type - 1;
         for (int i = 0; i < num_of_cells; i++) {
             cells[i].col = shapes[t][i][0];
             cells[i].row = shapes[t][i][1];
             cells[i].cell_color = (CellColor)type;
+        }
+    }
+    else {
+        for (int i = 0; i < num_of_cells; i++) {
+            cells[i].cell_color = CellColor::None;
         }
     }
 }
@@ -119,6 +125,24 @@ void Tetromino::setDefaultColor() {
 
     for (int i = 0; i < num_of_cells; i++) {
         cells[i].cell_color = color;
+    }
+}
+
+void Tetromino::setType(TetrominoType _type) {
+    num_of_cells = 4;
+    type = _type;
+    if (type != TetrominoType::None) {
+        unsigned int t = (unsigned int)type - 1;
+        for (int i = 0; i < num_of_cells; i++) {
+            cells[i].col = shapes[t][i][0];
+            cells[i].row = shapes[t][i][1];
+            cells[i].cell_color = (CellColor)type;
+        }
+    }
+    else {
+        for (int i = 0; i < num_of_cells; i++) {
+            cells[i].cell_color = CellColor::None;
+        }
     }
 }
 

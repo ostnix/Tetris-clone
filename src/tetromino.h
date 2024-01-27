@@ -60,6 +60,8 @@ public:
     void setTransparency(unsigned char transparency = 255);
     void setDefaultTransparensy();
     void setDefaultColor();
+    void setType(TetrominoType type);
+    
     
     int getCol();
     int getRow();

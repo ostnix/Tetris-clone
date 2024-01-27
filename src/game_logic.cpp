@@ -27,13 +27,14 @@ void GameLogic::start() {
     state.tetrominoes[ACTIVE] = getTetromino();
     state.tetrominoes[ACTIVE].setColRow(5, 0);
     state.tetrominoes[NEXT] = getTetromino();
-    state.tetrominoes[HOLDED].setColor(CellColor::None);
+    state.tetrominoes[HOLDED].setType(TetrominoType::None);
+    
     projectShadow();
 }
 
 bool GameLogic::holdTetromino() {
     if (state.hold_enabled) {
-        if (state.tetrominoes[HOLDED].type == state.tetrominoes[ACTIVE].type) {
+        if (state.tetrominoes[HOLDED].type == state.tetrominoes[ACTIVE].type || state.tetrominoes[HOLDED].getColor() == CellColor::Blank) {
             return false;
         }
 
@@ -43,16 +44,17 @@ bool GameLogic::holdTetromino() {
             state.tetrominoes[ACTIVE] = state.tetrominoes[NEXT];
             state.tetrominoes[ACTIVE].setColRow(5, 0);
             state.tetrominoes[NEXT] = getTetromino();
-            projectShadow();
         }
-        else if (state.tetrominoes[HOLDED].getColor() != CellColor::Blank) {
+        else {
             Tetromino tetromino = state.tetrominoes[ACTIVE];
             state.tetrominoes[ACTIVE] = state.tetrominoes[HOLDED];
             state.tetrominoes[ACTIVE].setColRow(tetromino.getCol(), tetromino.getRow());
             state.tetrominoes[HOLDED] = tetromino;
             state.tetrominoes[HOLDED].setColor(CellColor::Blank);
-            projectShadow();
         }
+
+        projectShadow();
+        state.sound_to_play = SoundEffect::Hold;
         return true;
     }
     return false;

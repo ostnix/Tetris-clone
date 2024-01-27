@@ -153,6 +153,9 @@ void Tetris::gameStep() {
 
 void Tetris::game() {
     if (state.enter_player_name) {
+        if (state.last_action == PlayerAction::SystemKey)
+            return;
+
         char text_input[MAX_TEXT_CHARS] = {'\0'};
         input->getLastTextInput(text_input);
         if (state.last_action == PlayerAction::Enter) {
