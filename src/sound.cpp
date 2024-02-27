@@ -29,10 +29,11 @@ bool Sound::loadSounds() {
     sounds[7] = Mix_LoadWAV("./sound/fast_drop.wav");
     sounds[8] = Mix_LoadWAV("./sound/line_cleared.wav");
     sounds[9] = Mix_LoadWAV("./sound/four_lines_cleared.wav");
+    sounds[10] = Mix_LoadWAV("./sound/hold.wav");
     
     bool result = true;
 
-    for (int i = 1; i < 10; i++) {
+    for (int i = 1; i < 11; i++) {
         result = result && sounds[i];
     }
     

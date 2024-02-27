@@ -18,10 +18,10 @@ void add_num(char* result, const int number) {
 Render::Render(int width, int height, const char* path_to_textures) : window_width(width), window_height(height) {
     TTF_Init();
 
-    assert(SDL_CreateWindowAndRenderer(window_width, window_height, 0, &window, &renderer) == 0);
+    SDL_CreateWindowAndRenderer(window_width, window_height, 0, &window, &renderer);
 
-    assert(loadTextures(path_to_textures));
-    assert(loadFonts());
+    loadTextures(path_to_textures);
+    loadFonts();
 
     border_width = ((float)window_width/(12*BORDER_SIZE*2)) * BORDER_SIZE;
     border_height = ((float)window_height/(22*BORDER_SIZE)) * BORDER_SIZE ;

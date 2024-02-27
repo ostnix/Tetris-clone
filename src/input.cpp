@@ -66,6 +66,8 @@ PlayerAction Input::getEvent() {
         case SDLK_RALT:
         case SDLK_LALT:
         case SDLK_PRINTSCREEN:
+        case SDLK_LSHIFT:
+        case SDLK_RSHIFT:
             return PlayerAction::SystemKey;
             break;
 
