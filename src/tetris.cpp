@@ -18,7 +18,7 @@ Tetris::~Tetris() {
     delete sound;
     delete input;
     delete game_view;
-    delete high_score;
+    delete high_score;  
 }
 
 void Tetris::start() {
@@ -50,46 +50,41 @@ void Tetris::handlePlayerAction() {
         if (state.last_action == PlayerAction::SystemKey)
             return;
 
+        if (state.context != MenuType::Game) {
+            if (state.last_action == PlayerAction::Down || state.last_action == PlayerAction::Up) {
+                state.sound_to_play = SoundEffect::MenuMove;
+            }
+            else if (state.last_action == PlayerAction::Enter) {
+                state.sound_to_play = SoundEffect::MenuSelect;
+            }
+        }
+
         switch (state.context) {
         case MenuType::Game:
             game();
             break;
 
         case MenuType::HighScore:
-            playMenuSound();
             highScore();
             break;
 
         case MenuType::InGameMenu:
-            playMenuSound();
             ingameMenu();
             break;
 
         case MenuType::MainMenu:
-            playMenuSound();
             mainMenu();
             break;
 
 
         case MenuType::Settings:
-            playMenuSound();
             settings();
             break;
         
         case MenuType::TexturePacks:
-            playMenuSound();
             texturePacks();
             break;
-        } 
-    }
-}
-
-void Tetris::playMenuSound() {
-    if (state.last_action == PlayerAction::Down || state.last_action == PlayerAction::Up) {
-        state.sound_to_play = SoundEffect::MenuMove;
-    }
-    else if (state.last_action == PlayerAction::Enter) {
-        state.sound_to_play = SoundEffect::MenuSelect;
+        }
     }
 }
 

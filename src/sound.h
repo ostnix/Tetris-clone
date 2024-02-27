@@ -11,7 +11,10 @@
 
 
 static const unsigned int MAX_SOUNDS = 11;
-enum class SoundEffect {None = 0, MenuSelect = 1 , MenuMove = 2, WrongMove = 3, Typing = 4, NewHighScore =5, GameEnd = 6, FastDrop = 7, LineCleared = 8, FourLinesCleared = 9, Hold = 10};
+enum class SoundEffect {None = 0, MenuSelect = 1 , MenuMove = 2, 
+                        WrongMove = 3, Typing = 4, NewHighScore =5, 
+                        GameEnd = 6, FastDrop = 7, LineCleared = 8, 
+                        FourLinesCleared = 9, Hold = 10};
 
 class Sound {
 public:

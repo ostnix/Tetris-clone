@@ -17,7 +17,6 @@ public:
 private:
     void gameLoop();
     void handlePlayerAction();
-    void playMenuSound();
     void gameStep();
 
     void game();
